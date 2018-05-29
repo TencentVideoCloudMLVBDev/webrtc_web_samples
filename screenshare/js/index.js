@@ -85,12 +85,12 @@ function onWebSocketClose() {
 function initRTC(opts){
     // 初始化
     window.RTC = new WebRTCAPI({
-        "useCloud":1,
-        "userId": opts.userId,
-        "userSig": opts.userSig,
-        "sdkAppId": opts.sdkappid,
-        "accountType": opts.accountType,
-        "closeLocalMedia": opts.closeLocalMedia
+        userId: opts.userId,
+        userSig: opts.userSig,
+        sdkAppId: opts.sdkappid,
+        accountType: opts.accountType,
+        screen: opts.screen,  //这里表示要使用屏幕分享
+        closeLocalMedia: opts.closeLocalMedia
     },function(){
         RTC.createRoom({
             roomid : opts.roomid * 1,
@@ -117,17 +117,36 @@ function initRTC(opts){
     // RTC.on("*",function(e){
     //     console.debug(e)
     // });
+    RTC.on("onErrorNotify", function( info ){
+        console.error( info )
+    });
 }
 $("#userId").val("video_"+ parseInt(Math.random()*100000000));
 
 function push(){
     //推流
-    login( false );
+    login(  );
+}
+
+function detect(){
+    WebRTCAPI.fn.detectRTC( function(data) { 
+        console.debug( data ); 
+        if( data.screen ){
+            alert("不支持")
+        }else{
+            alert('支持')
+        }
+    });
+}
+
+function screen(){
+    //推流
+    login({ screen: true });
 }
 
 function audience(){
     //不推流
-    login( true );
+    login({ closeLocalMedia: true });
 }
 
 
@@ -140,17 +159,17 @@ Bom = {
 	 * @example
 	 * 		$.bom.query('mod');
 	 */
-	query:function(n){
-		var m = window.location.search.match(new RegExp( "(\\?|&)"+n+"=([^&]*)(&|$)"));
-		return !m ? "":decodeURIComponent(m[2]);
+	query:function(n){ 
+		var m = window.location.search.match(new RegExp( "(\\?|&)"+n+"=([^&]*)(&|$)"));   
+		return !m ? "":decodeURIComponent(m[2]);  
 	},
 	getHash:function(n){
 		var m = window.location.hash.match(new RegExp( "(#|&)"+n+"=([^&]*)(&|$)"));
-		return !m ? "":decodeURIComponent(m[2]);
+		return !m ? "":decodeURIComponent(m[2]);  
 	}
 };
 
-function login( closeLocalMedia ){
+function login( opt ){
     sdkappid = Bom.query("sdkappid") || $("#sdkappid").val();
     userId = $("#userId").val();
     //请使用英文半角/数字作为用户名
@@ -174,14 +193,14 @@ function login( closeLocalMedia ){
                 // 页面处理，显示视频流页面
                 $("#video-section").show();
                 $("#input-container").hide();
-
                 initRTC({
                     "userId": userId,
                     "userSig": userSig,
                     "privateMapKey": privateMapKey,
                     "sdkappid": sdkappid,
                     "accountType": accountType,
-                    "closeLocalMedia": closeLocalMedia,
+                    "closeLocalMedia": opt && opt.closeLocalMedia,
+                    "screen": (opt && opt.screen) || false,
                     "roomid": $("#roomid").val()
                 });
             }else{

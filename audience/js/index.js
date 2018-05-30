@@ -79,7 +79,7 @@ function onRemoteStreamRemove( info ) {
 }
 
 function onWebSocketClose() {
-    WebRTCAPI.quit();
+    RTC.quit();
 }
 
 function initRTC(opts){
@@ -117,6 +117,14 @@ function initRTC(opts){
     // RTC.on("*",function(e){
     //     console.debug(e)
     // });
+
+    RTC.on("onErrorNotify", function( info ){
+        console.error( info )
+        /* info {
+            errorCode: xxxx,
+            errorMsg: "xxxxx"
+        } */
+    });
 }
 $("#userId").val("video_"+ parseInt(Math.random()*100000000));
 
@@ -130,6 +138,20 @@ function audience(){
     login( true );
 }
 
+function stopRTC(){
+    RTC.stopRTC(0 , function( info ){
+        console.debug( info )
+    },function( info ){
+        console.debug( info )
+    });
+}
+function startRTC(){
+    RTC.startRTC(0 , function( info ){
+        console.debug( info )
+    },function( info ){
+        console.debug( info )
+    });
+}
 
 Bom = {
 	/**
@@ -140,13 +162,13 @@ Bom = {
 	 * @example
 	 * 		$.bom.query('mod');
 	 */
-	query:function(n){
-		var m = window.location.search.match(new RegExp( "(\\?|&)"+n+"=([^&]*)(&|$)"));
-		return !m ? "":decodeURIComponent(m[2]);
+	query:function(n){ 
+		var m = window.location.search.match(new RegExp( "(\\?|&)"+n+"=([^&]*)(&|$)"));   
+		return !m ? "":decodeURIComponent(m[2]);  
 	},
 	getHash:function(n){
 		var m = window.location.hash.match(new RegExp( "(#|&)"+n+"=([^&]*)(&|$)"));
-		return !m ? "":decodeURIComponent(m[2]);
+		return !m ? "":decodeURIComponent(m[2]);  
 	}
 };
 

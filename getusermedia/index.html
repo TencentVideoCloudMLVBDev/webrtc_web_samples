@@ -8,6 +8,9 @@
   <link href='./css/style.css' rel='stylesheet'>
   <link rel="stylesheet" href="../assets/css/pure-min.css">
   <link rel="stylesheet" href="../assets/css/baby-blue.css">
+  <style>
+    .label{color:#000;width:80px;display: inline-block}
+  </style>
 </head>
 <body>
 
@@ -23,8 +26,12 @@
           <label for="userId">用户名:</label>
           <input class="form-control" id="userId" type="text" value="" />
           <label for="room-number">房间号:</label>
-          <input class="form-control" id="roomid" type="text" value="100905">
+          <input class="form-control" id="roomid" type="text" value="100906">
       </div>
+      <button class="btn btn-default" type="button" onclick="getUserMedia()">本地获取音视频</button>
+      <br />
+      <button class="btn btn-default" type="button" onclick="capture()">截图</button>
+      <br />
       <button class="btn btn-default" type="button" onclick="push()">我要视频通话</button>
       <br />
       <button class="btn btn-default" type="button" onclick="audience()">我要观看</button>
@@ -32,17 +39,29 @@
     </div>
   </div>
   <!-- 登录  -->
-
   <!-- RTC  -->
-  <div id="video-section" style="display: none">
-    <button class="btn btn-default" type="button" onclick="stopRTC()">停止推流</button>
-    <button class="btn btn-default" type="button" onclick="startRTC()">开始推流</button>
+  <div id="video-section" style="position: relative;">
         <div id="remote-video-wrap">
 
+        </div>
+        <br />
+        <button class="btn btn-default" type="button" onclick="capture()">截图</button>
+        <div id="stats">
+          
         </div>
     </div>
   </div>
   <!-- RTC  -->
+
+  <script id="template" type="text/html">
+    <div id="#id#">
+      <h2> Stream with id #id# </h2>
+      <p> <label class="label">bandwidth:</label> <span>#bandwidth#</span></p>
+      <p> <label class="label">resolution:</label> <span>#resolution#</span></p>
+      <p> <label class="label">Send Data:</label> <span>#send#</span></p>
+      <p> <label class="label">Recv Data:</label> <span>#recv#</span></p>
+    </div>
+  </script>
 
   <!-- jquery Demo用到，WebRTCAPI不依赖 -->
   <script src="../assets/libs/jquery.min.js"></script>

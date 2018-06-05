@@ -8,6 +8,10 @@
   <link href='./css/style.css' rel='stylesheet'>
   <link rel="stylesheet" href="../assets/css/pure-min.css">
   <link rel="stylesheet" href="../assets/css/baby-blue.css">
+  <style>
+    .label{color:#000;width:80px;display: inline-block}
+
+  </style>
 </head>
 <body>
 
@@ -35,14 +39,25 @@
 
   <!-- RTC  -->
   <div id="video-section" style="display: none">
-    <button class="btn btn-default" type="button" onclick="stopRTC()">停止推流</button>
-    <button class="btn btn-default" type="button" onclick="startRTC()">开始推流</button>
         <div id="remote-video-wrap">
 
+        </div>
+        <div id="stats">
+          
         </div>
     </div>
   </div>
   <!-- RTC  -->
+
+  <script id="template" type="text/html">
+    <div id="#id#">
+      <h2> Stream with id #id# </h2>
+      <p> <label class="label">bandwidth:</label> <span>#bandwidth#</span></p>
+      <p> <label class="label">resolution:</label> <span>#resolution#</span></p>
+      <p> <label class="label">Send Data:</label> <span>#send#</span></p>
+      <p> <label class="label">Recv Data:</label> <span>#recv#</span></p>
+    </div>
+  </script>
 
   <!-- jquery Demo用到，WebRTCAPI不依赖 -->
   <script src="../assets/libs/jquery.min.js"></script>

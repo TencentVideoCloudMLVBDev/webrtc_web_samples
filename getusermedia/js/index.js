@@ -53,6 +53,26 @@ function onLocalStreamAdd(info) {
 }
 
 
+function getUserMedia(){
+    WebRTCAPI.fn.getUserMedia({}, function( stream ){
+        onLocalStreamAdd({stream: stream})
+        window.localStream = stream;
+    }, function(){
+
+    })
+}
+
+function capture(){
+    var videoElement = document.getElementById("local")
+    videoElement.takeSnapshot( function(data){
+        console.debug( data );
+        var img = document.createElement('img');
+        img.src = data;
+        $("#remote-video-wrap").append( img);
+    })
+}
+
+
 function onRemoteStreamUpdate( info ) {
     console.debug( info )
     if (info.stream && info.stream.active === true)
@@ -67,6 +87,7 @@ function onRemoteStreamUpdate( info ) {
         console.log('欢迎用户'+ info.userId+ '加入房间');
     }
 }
+
 
 
 function onRemoteStreamRemove( info ) {
@@ -85,12 +106,12 @@ function onWebSocketClose() {
 function initRTC(opts){
     // 初始化
     window.RTC = new WebRTCAPI({
-        userId: opts.userId,
-        userSig: opts.userSig,
-        sdkAppId: opts.sdkappid,
-        accountType: opts.accountType,
-        screen: opts.screen,  //这里表示要使用屏幕分享
-        closeLocalMedia: opts.closeLocalMedia
+        "useCloud":1,
+        "userId": opts.userId,
+        "userSig": opts.userSig,
+        "sdkAppId": opts.sdkappid,
+        "accountType": opts.accountType,
+        "closeLocalMedia": opts.closeLocalMedia
     },function(){
         RTC.createRoom({
             roomid : opts.roomid * 1,
@@ -98,6 +119,18 @@ function initRTC(opts){
             role : "user",
             pstnBizType: parseInt($("#pstnBizType").val() || 0),
             pstnPhoneNumber:  $("#pstnPhoneNumber").val()
+        },function(){
+            RTC.getStats({
+                userId:0, //不传或者设置为0 ，为获取当前本端数据
+                interval: 2000 //2秒获取数据
+            },function(result){
+                renderData("self", {
+                    bandwidth: bytesToSize(result.bandwidth.speed),
+                    resolution: result.resolutions.send.width + "x"+result.resolutions.send.height,
+                    send: bytesToSize(result.audio.bytesSent + result.video.bytesSent),
+                    recv: bytesToSize(result.audio.bytesReceived + result.video.bytesReceived)
+                })
+            });
         });
     },function( error ){
         console.error("init error", error)
@@ -117,71 +150,41 @@ function initRTC(opts){
     // RTC.on("*",function(e){
     //     console.debug(e)
     // });
+
     RTC.on("onErrorNotify", function( info ){
         console.error( info )
-    });
-    RTC.on("onStreamNotify", function( info ){
-        console.error( 'onStreamNotify',info )
+        /* info {
+            errorCode: xxxx,
+            errorMsg: "xxxxx"
+        } */
     });
 }
 $("#userId").val("video_"+ parseInt(Math.random()*100000000));
 
 function push(){
     //推流
-    login(  );
-}
-
-function detect(){
-    WebRTCAPI.fn.detectRTC( function(data) { 
-        console.debug( data ); 
-        if( data.screen ){
-            alert("不支持")
-        }else{
-            alert('支持')
-        }
-    });
-}
-
-var swit_flag = 'camera'
-function screen(){
-    //推流
-    login({ screen: true });
-    swit_flag = 'screen';
-}
-function swit(){
-    swit_flag =  swit_flag == 'camera' ? 'screen' : 'camera';
-    console.error('switch to '+ swit_flag)
-    switch( swit_flag ){
-        case "camera":
-            RTC.stopRTC(0 , function(){
-                console.debug('ok')
-                RTC.startRTC({
-                    screen: false
-                });
-            },function(){
-                //RTC.startRTC(0);
-            });
-            break;
-        case "screen":
-            RTC.stopRTC(0 , function(){
-                console.debug('ok')
-                RTC.startRTC({
-                    screen: true
-                });
-            },function(){
-                //RTC.startRTC(0);
-            });
-            break;
-        default:
-            break;
-    }
+    login( false );
 }
 
 function audience(){
     //不推流
-    login({ closeLocalMedia: true });
+    login( true );
 }
 
+function stopRTC(){
+    RTC.stopRTC(0 , function( info ){
+        console.debug( info )
+    },function( info ){
+        console.debug( info )
+    });
+}
+function startRTC(){
+    RTC.startRTC(0 , function( info ){
+        console.debug( info )
+    },function( info ){
+        console.debug( info )
+    });
+}
 
 Bom = {
 	/**
@@ -202,7 +205,7 @@ Bom = {
 	}
 };
 
-function login( opt ){
+function login( closeLocalMedia ){
     sdkappid = Bom.query("sdkappid") || $("#sdkappid").val();
     userId = $("#userId").val();
     //请使用英文半角/数字作为用户名
@@ -226,14 +229,14 @@ function login( opt ){
                 // 页面处理，显示视频流页面
                 $("#video-section").show();
                 $("#input-container").hide();
+
                 initRTC({
                     "userId": userId,
                     "userSig": userSig,
                     "privateMapKey": privateMapKey,
                     "sdkappid": sdkappid,
                     "accountType": accountType,
-                    "closeLocalMedia": opt && opt.closeLocalMedia,
-                    "screen": (opt && opt.screen) || false,
+                    "closeLocalMedia": closeLocalMedia,
                     "roomid": $("#roomid").val()
                 });
             }else{
@@ -246,3 +249,51 @@ function login( opt ){
     })
 }
 
+
+
+
+function bytesToSize(bytes) {
+    var k = 1000;
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes <= 0) {
+        return '0 Bytes';
+    }
+    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(k)), 10);
+    
+    if(!sizes[i]) {
+        return '0 Bytes';
+    }
+
+    return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
+}
+
+
+
+//   <script id="template" type="text/html">
+//   <div id="#id#">
+//     <h2> Stream with id #id# </h2>
+//     <p> <label class="label">bandwidth:</label> <span>#bandwidth#</span></p>
+//     <p> <label class="label">resolutions:</label> <span>#resolutions#</span></p>
+//     <p> <label class="label">Send Data</label> <span>#send#</span></p>
+//     <p> <label class="label">Recv Data</label> <span>#recv#</span></p>
+//   </div>
+// </script>
+function renderData(id,data){
+    var html = $("#template").html();
+    html = replaceWith(html, 'id', id)
+    for( var a in data){
+        html = replaceWith(html, a, data[a])
+    }
+
+    if( $("#"+id).length > 0 ){
+        $("#"+id).html( html )
+    }else{
+        $("#stats").html( html );
+    }
+}
+
+function replaceWith(str, name , value){
+    var regex = new RegExp("#"+name+"#","gim");
+    str = str.replace(regex, value)
+    return str;
+}

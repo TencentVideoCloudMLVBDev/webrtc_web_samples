@@ -89,8 +89,7 @@ function initRTC(opts){
         userSig: opts.userSig,
         sdkAppId: opts.sdkappid,
         accountType: opts.accountType,
-        screen: opts.screen,  //这里表示要使用屏幕分享
-        closeLocalMedia: opts.closeLocalMedia
+        closeLocalMedia: true //手动调用推流接口
     },function(){
         RTC.createRoom({
             roomid : opts.roomid * 1,
@@ -98,6 +97,17 @@ function initRTC(opts){
             role : "user",
             pstnBizType: parseInt($("#pstnBizType").val() || 0),
             pstnPhoneNumber:  $("#pstnPhoneNumber").val()
+        },function(info){
+            console.debug('进房成功，调用推流接口');
+            RTC.startRTC({
+                screen: opts.screen
+            },function(info){
+                console.debug('推流成功');
+            },function(error){
+                console.error('推流失败',error)
+            });
+        },function(error){
+            console.error('error')
         });
     },function( error ){
         console.error("init error", error)
@@ -114,9 +124,8 @@ function initRTC(opts){
     // 服务器超时
     RTC.on("onRelayTimeout",onRelayTimeout)
     // just for debugging
-    // RTC.on("*",function(e){
-    //     console.debug(e)
-    // });
+
+    //监听SDK错误
     RTC.on("onErrorNotify", function( info ){
         console.error( info )
     });
@@ -154,9 +163,14 @@ function swit(){
     switch( swit_flag ){
         case "camera":
             RTC.stopRTC(0 , function(){
-                console.debug('ok')
+                console.debug('停止推流成功')
+                
                 RTC.startRTC({
                     screen: false
+                },function(info){
+                    console.debug('推流成功[摄像头]');
+                },function(error){
+                    console.error('推流失败[摄像头]',error)
                 });
             },function(){
                 //RTC.startRTC(0);
@@ -164,9 +178,13 @@ function swit(){
             break;
         case "screen":
             RTC.stopRTC(0 , function(){
-                console.debug('ok')
+                console.debug('停止推流成功')
                 RTC.startRTC({
                     screen: true
+                },function(info){
+                    console.debug('推流成功[屏幕分享]');
+                },function(error){
+                    console.error('推流失败[屏幕分享]',error)
                 });
             },function(){
                 //RTC.startRTC(0);

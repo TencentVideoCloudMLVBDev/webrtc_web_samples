@@ -8,70 +8,262 @@
   <link href='./css/style.css' rel='stylesheet'>
   <link rel="stylesheet" href="../assets/css/pure-min.css">
   <link rel="stylesheet" href="../assets/css/baby-blue.css">
+  <style>
+  .markdown-section a {
+    color: #4183c4;
+    text-decoration: none;
+    background: 0 0;
+}</style>
 </head>
 <body>
 
   <!-- 登录  -->
   <div id="input-container" class="container">
-    
-    <div class="login-box">
-      <div class="form-group">
-        <div class="hide">
-          <label for="sdkappid">SDKAPPID:&nbsp;</label>
-          <input class="form-control" id="sdkappid" type="text" value="1400037025" />
-        </div>
-          <label for="userId">用户名:</label>
-          <input class="form-control" id="userId" type="text" value="" />
-          <label for="room-number">房间号:</label>
-          <input class="form-control" id="roomid" type="text" value="100906">
-      </div>
-      <button class="btn btn-default" type="button" onclick="detect()">屏幕分享插件检测</button>
-      <br />
-      <button class="btn btn-default" type="button" onclick="screen()">屏幕分享</button>
-      <br />
-      <button class="btn btn-default" type="button" onclick="push()">视频通话</button>
-      <br />
-      <button class="btn btn-default" type="button" onclick="audience()">观看</button>
-      <p>注意：如果房间已经存在，则加入房间</p>
-    </div>
-  </div>
-  <!-- 登录  -->
 
-  <!-- RTC  -->
-  <div id="video-section" style="display: none">
-      <button class="btn btn-default" type="button" onclick="swit('camera')">视频源切换</button>
-      <br />
-        <div id="remote-video-wrap">
+      <div class="search-noresults">
 
-        </div>
-    </div>
+          <section class="normal markdown-section">
+
+          <h2 id="屏幕分享">屏幕分享</h2>
+  <p>从官方介绍可知，WebRTC不仅可提供以摄像头为源的视频通讯功能，也能PC屏幕分享，但目前Chrome浏览器，无法直接截取主机屏幕，故无法使用此功能，需要插件支持才能实现屏幕共享功能。</p>
+  <h4 id="1-屏幕分享端chrome浏览器安装插件">1. 屏幕分享端Chrome浏览器安装插件</h4>
+  <p>在Chrome浏览器中输入插件地址：<a href="https://chrome.google.com/webstore/detail/screen-share/igbnnaaplbclljbpbhaplekapmfegkmg?utm_source=chrome-app-launcher-info-dialog" target="_blank">https://chrome.google.com/webstore/detail/screen-share/igbnnaaplbclljbpbhaplekapmfegkmg?utm_source=chrome-app-launcher-info-dialog</a></p>
+  <blockquote>
+  <p>如果浏览器打不开该插件地址，请想办法到墙外安装。</p>
+  </blockquote>
+  <p>安装完成打开Demo地址检测是否安装成功 <a href="./demo.html" target="_blank">检测插件状态</a>。</p>
+  <h4 id="2-在页面中加载v15版本的webrtcapiminjs">2. 在页面中加载v1.5版本的WebRTCApi.min.js</h4>
+  <p>建议采用腾讯云提供的CDN地址加载WebRTCApi.min.js。</p>
+  <pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://sqimg.qq.com/expert_qq/webrtc/2.4/WebRTCAPI.min.js"</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span><span ></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  </code></pre>
+  <h3 id="屏幕分享demo">屏幕分享Demo</h3>
+  <p><a href="./demo.html" target="_blank">./demo.html</a></p>
+
+
+            </section>
+
   </div>
+  <hr>
+  <h3> 提供两种使用方式 </h3>
+  <h4> 初始化时调用 </h4>
+  <pre>
+//初始化时调用
+window.RTC = new WebRTCAPI({
+  ...,
+  screen:true
+});
+  </pre>
+
+  <h4> 推流时调用 </h4>
+  <pre>
+      //推流时调用
+      RTC.startRTC({
+        screen: true
+      })
+  </pre>
+  </div>
+
   <!-- RTC  -->
 
   <!-- jquery Demo用到，WebRTCAPI不依赖 -->
   <script src="../assets/libs/jquery.min.js"></script>
   <script src="../assets/libs/vconsole.min.js"></script>
+  <!-- <script src="../dist/WebRTCAPI.min.js"></script> -->
   <script>
-    // var vConsole = new VConsole();
+
+
+  // Last time updated on: June 08, 2018
+
+// Latest file can be found here: https://cdn.webrtc-experiment.com/Screen-Capturing.js
+
+// Muaz Khan     - www.MuazKhan.com
+// MIT License   - www.WebRTC-Experiment.com/licence
+// Documentation - https://github.com/muaz-khan/Chrome-Extensions/tree/master/Screen-Capturing.js
+// Demo          - https://www.webrtc-experiment.com/Screen-Capturing/
+
+// ___________________
+// Screen-Capturing.js
+
+// Source code: https://github.com/muaz-khan/Chrome-Extensions/tree/master/desktopCapture
+// Google AppStore installation path: https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk
+
+// This JavaScript file is aimed to explain steps needed to integrate above chrome extension
+// in your own webpages
+
+// Usage:
+// getScreenConstraints(function(screen_constraints) {
+//    navigator.mediaDevices.getUserMedia({ video: screen_constraints }).then(onSuccess).catch(onFailure );
+// });
+
+// First Step: Download the extension, modify "manifest.json" and publish to Google AppStore
+//             https://github.com/muaz-khan/Chrome-Extensions/tree/master/desktopCapture#how-to-publish-yourself
+
+// Second Step: Listen for postMessage handler
+// postMessage is used to exchange "sourceId" between chrome extension and you webpage.
+// though, there are tons other options as well, e.g. XHR-signaling, websockets, etc.
+window.addEventListener('message', function(event) {
+    if (event.origin != window.location.origin) {
+        return;
+    }
+
+    console.error( event)
+
+    onMessageCallback(event.data);
+});
+
+// and the function that handles received messages
+
+function onMessageCallback(data) {
+    // "cancel" button is clicked
+    if (data == 'PermissionDeniedError') {
+        chromeMediaSource = 'PermissionDeniedError';
+        if (screenCallback) return screenCallback('PermissionDeniedError');
+        else throw new Error('PermissionDeniedError');
+    }
+
+    // extension notified his presence
+    if (data == 'rtcmulticonnection-extension-loaded') {
+        chromeMediaSource = 'desktop';
+    }
+
+    // extension shared temp sourceId
+    if (data.sourceId && screenCallback) {
+        screenCallback(sourceId = data.sourceId, data.canRequestAudioTrack === true);
+    }
+}
+// global variables
+var chromeMediaSource = 'screen';
+var sourceId;
+var screenCallback;
+
+// this method can be used to check if chrome extension is installed & enabled.
+function isChromeExtensionAvailable(callback) {
+    if (!callback) return;
+
+    if (chromeMediaSource == 'desktop') return callback(true);
+
+    // ask extension if it is available
+    window.postMessage('are-you-there', '*');
+
+    setTimeout(function() {
+        if (chromeMediaSource == 'screen') {
+            callback(false);
+        } else callback(true);
+    }, 2000);
+}
+
+// this function can be used to get "source-id" from the extension
+function getSourceId(callback) {
+    if (!callback) throw '"callback" parameter is mandatory.';
+    if(sourceId) return callback(sourceId);
+
+    screenCallback = callback;
+    window.postMessage('get-sourceId', '*');
+}
+
+// this function can be used to get "source-id" from the extension
+function getCustomSourceId(arr, callback) {
+    if (!arr || !arr.forEach) throw '"arr" parameter is mandatory and it must be an array.';
+    if (!callback) throw '"callback" parameter is mandatory.';
+
+    if(sourceId) return callback(sourceId);
+
+    screenCallback = callback;
+
+    console.err('arr', arr );
+    window.postMessage({
+        'get-custom-sourceId': arr
+    }, '*');
+}
+
+// this function can be used to get "source-id" from the extension
+function getSourceIdWithAudio(callback) {
+    if (!callback) throw '"callback" parameter is mandatory.';
+    if(sourceId) return callback(sourceId);
+
+    screenCallback = callback;
+    window.postMessage('audio-plus-tab', '*');
+}
+
+var isFirefox = typeof window.InstallTrigger !== 'undefined';
+var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+var isChrome = !!window.chrome && !isOpera;
+
+function getChromeExtensionStatus(extensionid, callback) {
+    if (isFirefox) return callback('not-chrome');
+
+    if (arguments.length != 2) {
+        callback = extensionid;
+        extensionid = 'igbnnaaplbclljbpbhaplekapmfegkmg'; // default extension-id
+    }
+
+    var image = document.createElement('img');
+    image.src = 'chrome-extension://' + extensionid + '/icon.png';
+    image.onload = function() {
+        chromeMediaSource = 'screen';
+        window.postMessage('are-you-there', '*');
+        setTimeout(function() {
+            if (chromeMediaSource == 'screen') {
+                callback('installed-disabled');
+            } else callback('installed-enabled');
+        }, 2000);
+    };
+    image.onerror = function() {
+        callback('not-installed');
+    };
+}
+
+function getScreenConstraintsWithAudio(callback) {
+    getScreenConstraints(callback, true);
+}
+
+// this function explains how to use above methods/objects
+function getScreenConstraints(callback, captureSourceIdWithAudio) {
+    var firefoxScreenConstraints = {
+        mozMediaSource: 'window',
+        mediaSource: 'window'
+    };
+
+    if(isFirefox) return callback(null, firefoxScreenConstraints);
+
+    // this statement defines getUserMedia constraints
+    // that will be used to capture content of screen
+    var screen_constraints = {
+        mandatory: {
+            chromeMediaSource: chromeMediaSource,
+            maxWidth: screen.width > 1920 ? screen.width : 1920,
+            maxHeight: screen.height > 1080 ? screen.height : 1080
+        },
+        optional: []
+    };
+
+    // this statement verifies chrome extension availability
+    // if installed and available then it will invoke extension API
+    // otherwise it will fallback to command-line based screen capturing API
+    if (chromeMediaSource == 'desktop' && !sourceId) {
+        // sourceId = 'get-sourceId'
+        console.error('sourceId',sourceId)
+        getSourceId(function(sourceId) {
+            screen_constraints.mandatory.chromeMediaSourceId = sourceId;
+            callback(sourceId == 'PermissionDeniedError' ? sourceId : null, screen_constraints);
+        });
+        return;
+    }
+
+    // this statement sets gets 'sourceId" and sets "chromeMediaSourceId"
+    if (chromeMediaSource == 'desktop') {
+        screen_constraints.mandatory.chromeMediaSourceId = sourceId;
+    }
+
+    // now invoking native getUserMedia API
+    callback(null, screen_constraints);
+}
+
+  function resetGlobalData(){
+    sourceId = null
+    screenCallback = null
+  }
+
   </script>
-  <!-- 引入WebRTCAPI ， 强烈建议使用如下的CDN方式引入 -->
-  <!-- <script src="https://sqimg.qq.com/expert_qq/webrtc/latest/WebRTCAPI.min.js"></script> -->
-  <!-- demo 部分 -->
-  <script src="../dist/WebRTCAPI.min.js"></script>
-  <script>
-    document.write('<script src="./js/index.js?v='+new Date()+'" type="text/javascript"></scr'+'ipt>')
-  </script>
-  <script>
-      var _mtac = {};
-      (function() {
-          var mta = document.createElement("script");
-          mta.src = "https://pingjs.qq.com/h5/stats.js?v2.0.2";
-          mta.setAttribute("name", "MTAH5");
-          mta.setAttribute("sid", "500611043");
-          var s = document.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(mta, s);
-      })();
-      </script>
-  
 </body>
 </html>

@@ -84,11 +84,18 @@ function onWebSocketClose() {
 
 function initRTC(opts){
     // 初始化
+    console.debug('opts.closeLocalMedia',opts.closeLocalMedia)
     window.RTC = new WebRTCAPI({
         userId: opts.userId,
         userSig: opts.userSig,
         sdkAppId: opts.sdkappid,
         accountType: opts.accountType,
+        //2个地方可以设置，初始化，和 startRTC 时
+        screenSources: 'screen, window, audio, tab',
+        // screen  显示器
+        // window 应用窗口
+        // audio 声音
+        // tab chrome tab页
         closeLocalMedia: true //手动调用推流接口
     },function(){
         RTC.createRoom({
@@ -99,13 +106,20 @@ function initRTC(opts){
             pstnPhoneNumber:  $("#pstnPhoneNumber").val()
         },function(info){
             console.debug('进房成功，调用推流接口');
-            RTC.startRTC({
-                screen: opts.screen
-            },function(info){
-                console.debug('推流成功');
-            },function(error){
-                console.error('推流失败',error)
-            });
+            if( !opts.closeLocalMedia ){
+                RTC.startRTC({
+                    screen: opts.screen,
+                    screenSources: 'screen, window, audio, tab',
+                    // screen  显示器
+                    // window 应用窗口
+                    // audio 声音
+                    // tab chrome tab页
+                },function(info){
+                    console.debug('推流成功');
+                },function(error){
+                    console.error('推流失败',error)
+                });
+            }
         },function(error){
             console.error('error')
         });
@@ -157,8 +171,8 @@ function screen(){
     login({ screen: true });
     swit_flag = 'screen';
 }
-function swit(){
-    swit_flag =  swit_flag == 'camera' ? 'screen' : 'camera';
+function swit( swit_flag){
+    // swit_flag =  swit_flag == 'camera' ? 'screen' : 'camera';
     console.error('switch to '+ swit_flag)
     switch( swit_flag ){
         case "camera":

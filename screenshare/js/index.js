@@ -82,16 +82,25 @@ function onWebSocketClose() {
     RTC.quit();
 }
 
+
+
 function initRTC(opts){
     // 初始化
-    console.debug('opts.closeLocalMedia',opts.closeLocalMedia)
+    var screenSources = [];
+
+    var checkList = ['screen','window','audio','tab']
+
+    checkList.forEach(function(item){
+        if( $("#"+item).prop("checked") )
+        screenSources.push(item);
+    })
     window.RTC = new WebRTCAPI({
         userId: opts.userId,
         userSig: opts.userSig,
         sdkAppId: opts.sdkappid,
         accountType: opts.accountType,
         //2个地方可以设置，初始化，和 startRTC 时
-        screenSources: 'screen, window, audio, tab',
+        screenSources: screenSources.join(","),
         // screen  显示器
         // window 应用窗口
         // audio 声音
@@ -109,7 +118,7 @@ function initRTC(opts){
             if( !opts.closeLocalMedia ){
                 RTC.startRTC({
                     screen: opts.screen,
-                    screenSources: 'screen, window, audio, tab',
+                    screenSources: screenSources.join(",")
                     // screen  显示器
                     // window 应用窗口
                     // audio 声音

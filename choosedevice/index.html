@@ -23,20 +23,9 @@
           <label for="userId">用户名:</label>
           <input class="form-control" id="userId" type="text" value="" />
           <label for="room-number">房间号:</label>
-          <input class="form-control" id="roomid" type="text" value="100906">
+          <input class="form-control" id="roomid" type="text" value="100908">
       </div>
-      <button class="btn btn-default" type="button" onclick="detect()">屏幕分享插件检测</button>
-      <br />
-      <h5>分享源</h5>
-      <label for=""><input id="screen" type="checkbox" value="screen"checked > <span>screen</span></label>
-      <label for=""><input id="window" type="checkbox" value="window" checked> <span>window</span></label>
-      <label for=""><input id="audio" type="checkbox" value="audio" checked> <span>audio</span></label>
-      <label for=""><input id="tab" type="checkbox" value="tab" checked> <span>tab</span></label>
-      <button class="btn btn-default" type="button" onclick="screen()">屏幕分享</button>
-      <br />
-      <button class="btn btn-default" type="button" onclick="push()">视频通话</button>
-      <br />
-      <button class="btn btn-default" type="button" onclick="audience()">观看</button>
+      <button class="btn btn-default" type="button" onclick="push()">进入房间</button>
       <p>注意：如果房间已经存在，则加入房间</p>
     </div>
   </div>
@@ -44,9 +33,13 @@
 
   <!-- RTC  -->
   <div id="video-section" style="display: none">
-    <button class="btn btn-default" type="button" onclick="swit('camera')">摄像头</button>
-    <button class="btn btn-default" type="button" onclick="swit('screen')">屏幕分享</button>
-      <br />
+    <p><button onclick="listDevices()">枚举设备</button></p>
+    <h4>摄像头</h4>
+    <div id="videoDevices"></div>
+    <h4>麦克风</h4>
+    <div id="audioDevices"></div>
+    <p><button onclick="switchVideoDevice()">随机切换摄像头</button></p>
+    <p><button onclick="switchAudioDevice()">随机切换麦克风</button></p>
         <div id="remote-video-wrap">
 
         </div>
@@ -79,5 +72,6 @@
             s.parentNode.insertBefore(mta, s);
         })();
     </script>
+  
 </body>
 </html>

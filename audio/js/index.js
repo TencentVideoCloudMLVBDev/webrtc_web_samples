@@ -96,7 +96,8 @@ function initRTC(opts){
         RTC.createRoom({
             roomid : opts.roomid * 1,
             privateMapKey: opts.privateMapKey,
-            role : "user"
+            role : "user",
+            pureAudioPush: $("#pureAudioPush").prop("checked") ? 1 : 0
         });
     },function( error ){
         console.error("init error", error)

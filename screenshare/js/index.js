@@ -114,15 +114,11 @@ function initRTC(opts){
             pstnBizType: parseInt($("#pstnBizType").val() || 0),
             pstnPhoneNumber:  $("#pstnPhoneNumber").val()
         },function(info){
-            console.debug('进房成功，调用推流接口');
             if( !opts.closeLocalMedia ){
                 RTC.startRTC({
                     screen: opts.screen,
-                    screenSources: screenSources.join(",")
-                    // screen  显示器
-                    // window 应用窗口
-                    // audio 声音
-                    // tab chrome tab页
+                    screenSources: screenSources.join(","),
+                    screenRole: "user"
                 },function(info){
                     console.debug('推流成功');
                 },function(error){

@@ -12,7 +12,7 @@
 // 去控制台把私钥下载下来，用TLS工具算一个签名（usersig)
 
 //不要把您的sdkappid填进来就用这个cgi去测，测试demo的cgi没有您的私钥，臣妾做不到啊
-var FetchSigCgi = 'https://sxb.qcloud.com/sxb_dev/?svc=account&cmd=authPrivMap';
+var FetchSigCgi = 'https://sxb.qcloud.com/sxb_dev/?svc=doll&cmd=fetchsig';
 var sdkappid,
     accountType = 14418, // accounttype 还是在文档中会找到
     userSig,
@@ -20,20 +20,27 @@ var sdkappid,
 
 
 function onKickout() {
-    console.error("on kick out!");
+    alert("on kick out!");
 }
 
 function onRelayTimeout(msg) {
-    console.error("onRelayTimeout!" + (msg ? JSON.stringify(msg) : ""));
+    alert("onRelayTimeout!" + (msg ? JSON.stringify(msg) : ""));
 }
+
 
 function createVideoElement( id, isLocal ){
-    var videoDiv=document.createElement("div");
-    videoDiv.innerHTML = '<video id="'+id+'" autoplay '+ (isLocal ? 'muted':'') +' playsinline ></video>';
-    document.querySelector("#remote-video-wrap").appendChild(videoDiv);
-
-    return document.getElementById(id);
+    var videoNode=document.createElement("video");
+    videoNode.id = id;
+    videoNode.autoplay = 'true';
+    videoNode.playsinline = 'true';
+    if( isLocal ){
+        videoNode.muted = 'true';
+    }
+    videoNode.controls = 'true';
+    document.querySelector("#remote-video-wrap").appendChild(videoNode);
+    return videoNode;
 }
+
 
 function onLocalStreamAdd(info) {
     if (info.stream && info.stream.active === true)
@@ -41,14 +48,9 @@ function onLocalStreamAdd(info) {
         var id = "local";
         var video = document.getElementById(id);
         if(!video){
-            createVideoElement(id, true);
+            video = createVideoElement(id, true);
         }
-        var video = document.getElementById(id)
         video.srcObject = info.stream;
-        video.muted = true
-        video.autoplay = true
-        video.playsinline = true
-
     }
 }
 
@@ -74,18 +76,17 @@ function onRemoteStreamRemove( info ) {
     var videoNode = document.getElementById( info.videoId );
     if( videoNode ){
         videoNode.srcObject = null;
-        document.getElementById(info.videoId).parentElement.removeChild(videoNode);
+        document.querySelector("#remote-video-wrap").removeChild(videoNode);
     }
 }
 
 function onWebSocketClose() {
-    RTC.quit();
+    WebRTCAPI.quit();
 }
 
 function initRTC(opts){
     // 初始化
-    window.RTC = new WebRTCAPI({
-        "useCloud": Bom.query("useCloud") || 0 ,
+    var RTC = new WebRTCAPI({
         "userId": opts.userId,
         "userSig": opts.userSig,
         "sdkAppId": opts.sdkappid,
@@ -94,10 +95,7 @@ function initRTC(opts){
     },function(){
         RTC.createRoom({
             roomid : opts.roomid * 1,
-            privateMapKey: opts.privateMapKey,
-            role : "user",
-            pureAudioPush: parseInt($("#pstnBizType").val() || 0),
-            pstnPhoneNumber:  $("#pstnPhoneNumber").val()
+            role : "user"
         });
     },function( error ){
         console.error("init error", error)
@@ -117,64 +115,18 @@ function initRTC(opts){
     // RTC.on("*",function(e){
     //     console.debug(e)
     // });
-
-    RTC.on("onErrorNotify", function( info ){
-        console.error( info )
-        /* info {
-            errorCode: xxxx,
-            errorMsg: "xxxxx"
-        } */
-    });
 }
 $("#userId").val("video_"+ parseInt(Math.random()*100000000));
-// $("#userId").val("audience0000");
 
 function push(){
     //推流
     login( false );
 }
 
-function audience(){
-    //不推流
-    login( true );
-}
 
-function stopRTC(){
-    RTC.stopRTC(0 , function( info ){
-        console.debug( info )
-    },function( info ){
-        console.debug( info )
-    });
-}
-function startRTC(){
-    RTC.startRTC(0 , function( info ){
-        console.debug( info )
-    },function( info ){
-        console.debug( info )
-    });
-}
-
-Bom = {
-	/**
-	 * @description 读取location.search
-	 *
-	 * @param {String} n 名称
-	 * @return {String} search值
-	 * @example
-	 * 		$.bom.query('mod');
-	 */
-	query:function(n){ 
-		var m = window.location.search.match(new RegExp( "(\\?|&)"+n+"=([^&]*)(&|$)"));   
-		return !m ? "":decodeURIComponent(m[2]);  
-	},
-	getHash:function(n){
-		var m = window.location.hash.match(new RegExp( "(#|&)"+n+"=([^&]*)(&|$)"));
-		return !m ? "":decodeURIComponent(m[2]);  
-	}
-};
 
 function login( closeLocalMedia ){
-    sdkappid = Bom.query("sdkappid") || $("#sdkappid").val();
+    sdkappid = $("#sdkappid").val();
     userId = $("#userId").val();
     //请使用英文半角/数字作为用户名
     $.ajax({
@@ -182,18 +134,13 @@ function login( closeLocalMedia ){
         url: FetchSigCgi,
         dataType: 'json',
         data:JSON.stringify({
-            pwd: "12345678",
-            appid: parseInt(sdkappid),
-            roomnum:parseInt($("#roomid").val()),
-            privMap:255,
-            identifier : userId,
-            accounttype: accountType
+            appid: sdkappid,
+            id : userId
         }),
         success: function (json) {
             if(json && json.errorCode === 0 ){
                 //一会儿进入房间要用到
-                var userSig = json.data.userSig;
-                var privateMapKey = json.data.privMapEncrypt;
+                userSig = json.data.userSig;
                 // 页面处理，显示视频流页面
                 $("#video-section").show();
                 $("#input-container").hide();
@@ -201,7 +148,6 @@ function login( closeLocalMedia ){
                 initRTC({
                     "userId": userId,
                     "userSig": userSig,
-                    "privateMapKey": privateMapKey,
                     "sdkappid": sdkappid,
                     "accountType": accountType,
                     "closeLocalMedia": closeLocalMedia,

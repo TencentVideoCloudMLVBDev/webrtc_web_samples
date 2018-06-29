@@ -161,8 +161,8 @@ function push(){
 
 function detect(){
     WebRTCAPI.fn.detectRTC( function(data) { 
-        console.debug( data ); 
-        if( data.screen ){
+        console.debug( data.screenshare ); 
+        if( !data.screenshare ){
             alert("不支持")
         }else{
             alert('支持')

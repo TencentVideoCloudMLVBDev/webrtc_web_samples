@@ -1227,16 +1227,11 @@ ConnectionTest.prototype = {
         });
         var that = this;
         function onicecandidate_(e) {
-            console.debug('onicecandidate_',e)
             var candidate = e.candidate;
-            if (!candidate) {
-                that.test.done();
-                peerConnection.close();
-                return;
-            }
-            console.debug(e)
             if (filterIceCandidate_(candidate)) {
                 that.test.reportSuccess(candidate.candidate);
+                that.test.done();
+                peerConnection.close();
             } else {
                 that.test.reportInfo(candidate.candidate);
             }
@@ -1256,10 +1251,6 @@ ConnectionTest.prototype = {
         function filterIceCandidate_(candidate) {
             var str = candidate.candidate;
             if (str.indexOf("tcp") != -1) {
-                return false;
-            }
-            var type = getIceCandidateType_(candidate);
-            if (type != "srflx") {
                 return false;
             }
             return true;

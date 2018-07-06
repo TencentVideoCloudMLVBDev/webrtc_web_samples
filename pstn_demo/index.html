@@ -20,33 +20,20 @@
           <label for="sdkappid">SDKAPPID:&nbsp;</label>
           <input class="form-control" id="sdkappid" type="text" value="1400037025" />
         </div>
-          <label for="userId">用户名:</label>
-          <input class="form-control" id="userId" type="text" value="" />
+        <label for="userId">用户名:</label>
+        <input class="form-control" id="userId" type="text" value="" />
+        <label for="userSig">userSig:</label>
+        <textarea class="form-control" id="userSig" rows="5" type="text"></textarea>
           <label for="room-number">房间号:</label>
-          <input class="form-control" id="roomid" type="text" value="100906">
+          <input class="form-control" id="roomid" type="text" value="100905">
       </div>
-      <button class="btn btn-default" type="button" onclick="detect()">屏幕分享插件检测</button>
-      <br />
-      <h5>分享源</h5>
-      <label for=""><input id="screen" type="checkbox" value="screen"checked > <span>screen</span></label>
-      <label for=""><input id="window" type="checkbox" value="window" checked> <span>window</span></label>
-      <label for=""><input id="audio" type="checkbox" value="audio" checked> <span>audio</span></label>
-      <label for=""><input id="tab" type="checkbox" value="tab" checked> <span>tab</span></label>
-      <button class="btn btn-default" type="button" onclick="screen()">屏幕分享</button>
-      <br />
-      <button class="btn btn-default" type="button" onclick="push()">视频通话</button>
-      <br />
-      <button class="btn btn-default" type="button" onclick="audience()">观看</button>
-      <p>注意：如果房间已经存在，则加入房间</p>
+      <button class="btn btn-default" type="button" onclick="enter()">进入房间</button>
     </div>
   </div>
   <!-- 登录  -->
 
   <!-- RTC  -->
   <div id="video-section" style="display: none">
-    <button class="btn btn-default" type="button" onclick="swit('camera')">摄像头</button>
-    <button class="btn btn-default" type="button" onclick="swit('screen')">屏幕分享</button>
-      <br />
         <div id="remote-video-wrap">
 
         </div>
@@ -61,13 +48,10 @@
     // var vConsole = new VConsole();
   </script>
   <!-- 引入WebRTCAPI ， 强烈建议使用如下的CDN方式引入 -->
-  <!-- <script src="https://sqimg.qq.com/expert_qq/webrtc/2.4/WebRTCAPI.min.js"></script> -->
+  <script src="https://sqimg.qq.com/expert_qq/webrtc/2.4/WebRTCAPI.min.js"></script>
   <!-- demo 部分 -->
-  <!-- <script src="../dist/WebRTCAPI.min.js"></script> -->
   <script src="../dist/WebRTCAPI.min.js"></script>
-  <script>
-    document.write('<script src="./js/index.js?v='+new Date()+'" type="text/javascript"></scr'+'ipt>')
-  </script>
+  <script src="./js/index.js"></script>
     <script>
         var _mtac = {"senseHash":0};
         (function() {
@@ -80,5 +64,6 @@
             s.parentNode.insertBefore(mta, s);
         })();
     </script>
+  
 <!-- Global site tag (gtag.js) - Google Analytics --> <script async src="https://www.googletagmanager.com/gtag/js?id=UA-121844058-1"></script> <script>   window.dataLayer = window.dataLayer || [];   function gtag(){dataLayer.push(arguments);}   gtag('js', new Date());    gtag('config', 'UA-121844058-1'); </script></body>
 </html>

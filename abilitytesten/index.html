@@ -14,21 +14,21 @@
 <body>
 <div id="test-content" class="container">
     <div class="header">
-        <h2 class="title">WEBRTC 能力测试</h2>
+        <h2 class="title">WEBRTC Troubleshooter</h2>
         <button id="start-btn" type="button" class="btn btn-info btn-circle btn-xl">
-            开始
+            Start
         </button>
     </div>
     <div class="box">
-        <p id="browser-title" class="test-box">浏览器</p>
+        <p id="browser-title" class="test-box">Browser Detect</p>
         <div id="browser-detail" class="detail-box"></div>
     </div>
     <div class="box">
-        <p id="mic-title" class="test-box">麦克风</p>
+        <p id="mic-title" class="test-box">Microphone Device Test</p>
         <div id="mic-detail" class="detail-box"></div>
         <div id="meters" style="max-width: 640px;width: 100%;margin:auto;display: none">
             <div id="instant">
-              <div class="label">实时音量: </div>
+              <div class="label">Volumn: </div>
               <meter high="0.25" max="1" value="0"></meter>
               <div class="value"></div>
             </div>
@@ -45,21 +45,21 @@
           </div>
     </div>
     <div class="box">
-        <p class="test-box">音频输出</p>
+        <p class="test-box">Audio Output</p>
         <div class="detail-box">
             <audio src="voice.mp3" controls></audio>
         </div>
     </div>
     <div class="box">
-        <p id="camera-title" class="test-box">摄像头</p>
+        <p id="camera-title" class="test-box">Camera Device Test</p>
         <div id="camera-detail" class="detail-box"></div>
     </div>
-    <div class="box">
+    <div class="box" style="display: none">
         <p id="support-title" class="test-box">分辨率</p>
         <div id="support-detail" class="detail-box"></div>
     </div>
     <div class="box">
-        <p id="connection-title" class="test-box">连通性</p>
+        <p id="connection-title" class="test-box">Connectivity</p>
         <div id="connection-detail" class="detail-box"></div>
     </div>
     <div class="box">

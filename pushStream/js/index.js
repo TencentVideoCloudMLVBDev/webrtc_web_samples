@@ -306,9 +306,13 @@ function getMediaStream( type ,callback ){
             }
         },function(info){
             streams['screen'] = info.stream
+            console.debug('getLocalStream succ', info.stream)
             callback( info.stream )
+        },function(error){
+            console.error('failed', error)
         });
     }else if( type === 'camera' ){
+        console.debug( 'camera ')
         RTC.getLocalStream({
             attributes:{
                 width:640,
@@ -316,8 +320,11 @@ function getMediaStream( type ,callback ){
                 frameRate:20
             }
         },function(info){
+            console.debug('getLocalStream succ', info.stream)
             streams['camera'] = info.stream
             callback( info.stream )
+        },function(error){
+            console.error('failed', error)
         });
     }     
 }

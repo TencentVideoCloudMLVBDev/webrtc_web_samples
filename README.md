@@ -2,7 +2,7 @@
 
 ```html
 <!-- 请使用最新版本 CDN -->
-<script src="https://sqimg.qq.com/expert_qq/webrtc/2.4/WebRTCAPI.min.js" >
+<script src="https://sqimg.qq.com/expert_qq/webrtc/2.5.2/WebRTCAPI.min.js" >
 ```
 
 ## 项目简介

@@ -15,92 +15,29 @@
 // canvas绘制
 var canvasEle = document.getElementById("clock");
 var context = canvasEle.getContext("2d");
-function drawClock() {
-    context.clearRect(0, 0, canvasEle.width, canvasEle.height);
-
+function redraw() {
     context.fillStyle = "#fff";   
-    context.fillRect(0, 0, canvasEle.width, canvasEle.height);  
-
-    var circleX = 200;    // 圆心X坐标
-    var circleY = 200;    // 圆心Y坐标
-    var radius = 190;    // 半径长度
-
-    // 获取时间信息
-    var date = new Date();
-    var hour = date.getHours();
-    var min = date.getMinutes();
-    var sec = date.getSeconds();
-
-    // 分针走一圈60度，时针走30度
-    // 度数转化为弧度  度数*Math.PI/180
-    var hourValue = (-90+30*hour+min/2)*Math.PI/180;
-    var minValue = (-90+6*min)*Math.PI/180;
-    var secValue = (-90+6*sec)*Math.PI/180;
-
-    // 绘制表盘
-    context.beginPath();
-    context.font = "bold 16px Arial";
-    context.lineWidth = '3';
-    for(var i=0;i<12;i++) {
-        context.moveTo(circleX,circleY);
-        context.arc(circleX,circleY,radius,30*i*Math.PI/180,30*(i+1)*Math.PI/180,false); 
-    }
-    context.stroke();
-
-    context.fillStyle='#0ff';
-    context.beginPath();
-    context.moveTo(circleX,circleY);
-    context.arc(circleX,circleY,radius*19/20,0,360*Math.PI/180,false);
-    context.closePath();
-    context.fill();
-
-    // 绘制钟表中心
-    context.beginPath();
-    context.arc(200,200,6,0,360,false);
-    context.fillStyle = "#000";
-    context.fill();//画实心圆
-    context.closePath();
-
-    // 绘制时针刻度
-    context.lineWidth = '5';
-    context.beginPath();
-    context.moveTo(circleX, circleY);
-    context.arc(circleX, circleY, radius*9/20, hourValue, hourValue, false);
-    context.stroke();
-
-    // 绘制分针
-    context.lineWidth = '3';
-    context.beginPath();
-    context.moveTo(circleX, circleY);
-    context.arc(circleX, circleY, radius*13/20, minValue, minValue, false);
-    context.stroke();
-    
-    // 绘制秒针
-    context.lineWidth = '1';
-    context.beginPath();
-    context.moveTo(circleX, circleY);
-    context.arc(circleX, circleY, radius*18/20, secValue, secValue, false);
-    context.stroke();
-
-
-    // 绘制钟表的数字
-    context.fillStyle = "#0ad";
-    context.fillText("12", 190, 34);
-    context.fillText("3", 370, 206);
-    context.fillText("6", 196, 378);
-    context.fillText("9", 22, 206);
-
+    context.fillRect(0, 0, 1, 1);  
+    console.debug('redraw')
 }
-setInterval(drawClock, 1000);
-drawClock();
-
-
-// canvas捕获为stream canvasEle.captureStream(frameRate)
-var CanvasStream = canvasEle.captureStream(25);
-// 获取音频流，并将音轨添加到捕获的stream中
+function getcanvasStream() {
+  var canvasW = canvasEle.width;
+  var ctx = canvasEle.getContext('2d');
+  ctx.moveTo(0, 0);
+  ctx.lineTo(100, 100);
+  ctx.stroke();
+  var img = new Image();
+  img.src = "photo.jpg";
+  img.onload = function(){
+    ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasW, (canvasW * img.height) / img.width);
+   }
+}
+getcanvasStream();
+setInterval(redraw, 100);
+var canvasStream = canvasEle.captureStream(20);
 navigator.mediaDevices.getUserMedia({audio:true},
     function(audioStream) {
-        CanvasStream.addTrack(audioStream.getAudioTracks()[0]);
+        canvasStream.addTrack(audioStream.getAudioTracks()[0]);
     }, function(error) {
         var errorMsg = "get user media failed : error = " + error.message;
         console.error(errorMsg);
@@ -185,9 +122,7 @@ function initRTC(opts){
         userSig: opts.userSig,
         sdkAppId: opts.sdkappid,
         accountType: opts.accountType,
-        "closeLocalMedia": true,
-        // canvas传入参数为捕获的stream
-        canvas: CanvasStream
+        closeLocalMedia: true
     },function(){
         RTC.createRoom({
             roomid : opts.roomid * 1,
@@ -195,7 +130,7 @@ function initRTC(opts){
             role : "user",
         },function(info){
             RTC.startRTC({
-                canvas: CanvasStream
+                canvas: canvasStream
             },function(info){
                 console.debug('推流成功');
             },function(error){
@@ -237,7 +172,7 @@ function push(){
 
 function start(){
     RTC.startRTC({
-        canvas: CanvasStream
+        canvas: canvasStream
     },function(info){
         console.debug('推流成功');
     },function(error){
@@ -247,7 +182,7 @@ function start(){
 
 function stop(){
     RTC.stopRTC({
-        canvas: CanvasStream
+        canvas: canvasStream
     },function(info){
         console.debug('断流成功');
     },function(error){

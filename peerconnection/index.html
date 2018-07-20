@@ -12,22 +12,22 @@
 <body>
 
   <!-- 登录  -->
-  <div id="input-container" class="container">
-    
-    <div class="login-box">
+  <div id="input-container" class="container" style="text-align:center">
+      <h4 style="text-align:left">场景介绍</h4>
+      <img src="https://main.qcloudimg.com/raw/edc9ce45233e3cfbfed7bb1cea4e1bab.png"  width=600 />
+    <div class="login-box" style="text-align:left;margin-top:0">
       <div class="form-group">
         <div class="hide">
           <label for="sdkappid">SDKAPPID:&nbsp;</label>
           <input class="form-control" id="sdkappid" type="text" value="1400037025" />
         </div>
-          <label for="userId">用户名:</label>
-          <input class="form-control" id="userId" type="text" value="" />
           <label for="room-number">房间号:</label>
           <input class="form-control" id="roomid" type="text" value="100911">
       </div>
-      <button class="btn btn-default" type="button" onclick="push()">我要视频通话</button>
-      <br />
-      <button class="btn btn-default" type="button" onclick="audience()">我要观看</button>
+      <button class="btn btn-default" type="button" onclick="push('userA')">我是用户A</button><br/>
+      <button class="btn btn-default" type="button" onclick="push('userB')">我是用户B</button><br/>
+      <button class="btn btn-default" type="button" onclick="push('userC')">我是用户C</button><br/>
+      <button class="btn btn-default" type="button" onclick="push('userD')">我是用户D</button>
       <p>注意：如果房间已经存在，则加入房间</p>
     </div>
   </div>

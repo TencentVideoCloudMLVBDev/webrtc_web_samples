@@ -15,6 +15,7 @@
 var FetchSigCgi = 'https://sxb.qcloud.com/sxb_dev/?svc=account&cmd=authPrivMap';
 var sdkappid,
     accountType = 14418, // accounttype 还是在文档中会找到
+    userId,
     userSig,
     username;
 
@@ -52,6 +53,21 @@ function onLocalStreamAdd(info) {
 }
 
 
+function onPeerConnectionAdd(info) {
+    console.debug('onPeerConnectionAdd', info)
+    //A用户跟所有人建连
+    if( userId === 'userA'){
+        RTC.startRTC(info)
+        return;
+    }
+    //其他用户只跟A进行P2P连接
+    console.error("info.userId", info.userId)
+    if( info.userId === 'userA' ){
+        RTC.startRTC(info)
+    }
+}
+
+
 function onRemoteStreamUpdate(info) {
     console.debug(info)
     if (info.stream && info.stream.active === true) {
@@ -81,31 +97,18 @@ function onWebSocketClose() {
 }
 
 function initRTC(opts) {
-    // 初始化
-    // opts.userId="xiaolin";
-    // opts.roomid=152658223;
-    // opts.sdkappid= 1400096178
-    // opts.userSig = "eJxNjstugzAQRf*FbavKjzhApSwigiio0KA8VGVjOWCSEYlxjdPQVvn3EkSlzvKcmXvnx1m-rp5EUTQXZbn90tJ5dpDzOGAopbJQgTQ97EA0J1CjElpDyYXl1JT-Ltqy5oPqGZ4ghPwpdr1Ryk6DkVxUdgjEk35hVJ-StNConhKEGSYU3WeUFs73rzAjHvZdj7p-ZXDocRrmQZwvDnnsTw187L4f3pjIsvpComhfpBGFTLF5d9wk15O-1PU1jysp38Ok9deBFvGxgmS1lFBtQnfLFH1JVbil9LwISGHms5lz*wVI9VfY"
     window.RTC = new WebRTCAPI({
         useCloud: 1, //是否使用云上环境
         userId: opts.userId,
         userSig: opts.userSig,
         sdkAppId: opts.sdkappid,
-        accountType: opts.accountType,
-        wsRetryMaxTimes: 5, //最大重连次数 
-        wsRetryDist: 3000 //毫秒 ，首次间隔3000毫秒， 第N次重连间隔 为 N * DIST （ 2 * 3000） 
+        accountType: opts.accountType,        
+        peerAddNotify: true //peer connection 通知
     }, function () {
         RTC.createRoom({
             roomid: opts.roomid * 1,
             privateMapKey: opts.privateMapKey,
-            role: "user",
-            // role : "wp1280",
-            /* constraints: { 
-                video: devices.video[1],
-                audio:devices.audio[1]
-            } */
-            // pstnBizType: parseInt($("#pstnBizType").val() || 0),
-            // pstnPhoneNumber:  $("#pstnPhoneNumber").val()
+            role: "user"
         }, function (info) {
             console.warn("init succ", info)
         }, function (error) {
@@ -114,6 +117,9 @@ function initRTC(opts) {
     }, function (error) {
         console.warn("init error", error)
     });
+
+    // P2P连接通知
+    RTC.on("onPeerConnectionAdd", onPeerConnectionAdd)
 
     // 远端流新增/更新
     RTC.on("onRemoteStreamUpdate", onRemoteStreamUpdate)
@@ -142,18 +148,12 @@ function initRTC(opts) {
         // console.error( 'onUserDefinedWebRTCEventNotice',info )
     });
 }
-$("#userId").val("video_" + parseInt(Math.random() * 100000000));
 
-function push() {
+function push(userId) {
     //推流
-    login(false);
+    login({userId:userId});
 
 
-}
-
-function audience() {
-    //不推流
-    login(true);
 }
 
 function stopRTC() {
@@ -212,10 +212,9 @@ Bom = {
     }
 };
 
-function login(closeLocalMedia) {
+function login( opt ) {
     sdkappid = Bom.query("sdkappid") || $("#sdkappid").val();
-    userId = $("#userId").val();
-    //请使用英文半角/数字作为用户名
+    userId = opt.userId
     $.ajax({
         type: "POST",
         url: FetchSigCgi,
@@ -243,7 +242,6 @@ function login(closeLocalMedia) {
                     "privateMapKey": privateMapKey,
                     "sdkappid": sdkappid,
                     "accountType": accountType,
-                    "closeLocalMedia": closeLocalMedia,
                     "roomid": $("#roomid").val()
                 });
 

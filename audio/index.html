@@ -20,7 +20,13 @@
         <input class="form-control" id="username" type="text" value="" />
         <label for="room-number">房间号:</label>
         <input class="form-control" id="roomid" type="text" value="100901">
-        <input id="pureAudioPush" type="checkbox" value="1"> 纯音频推流
+        <label for="room-number">纯音频推流类型:</label>
+        <select class="form-control" id="pureAudioPushMod">
+            <option value="1">(mode:1)纯音频推流,不需要录制mp3文件</option>
+            <option value="2">(mode:2)本次是纯音频推流,录制文件为mp3</option>
+        </select>
+        <label for="room-number">录制id:</label>
+        <input class="form-control" id="recordId" type="text" value="">
     </div>
     <button class="btn btn-default" type="button" onclick="login()">创建/加入房间</button>
     <p>注意：如果房间已经存在，则加入房间</p>

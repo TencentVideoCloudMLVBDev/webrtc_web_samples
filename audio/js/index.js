@@ -94,10 +94,11 @@ function initRTC(opts){
         "video": false
     },function(){
         RTC.createRoom({
-            roomid : opts.roomid * 1,
+            roomId : opts.roomid * 1,
             privateMapKey: opts.privateMapKey,
             role : "user",
-            pureAudioPush: $("#pureAudioPush").prop("checked") ? 1 : 0
+            recordId: $("#recordId").val() || null,
+            pureAudioPushMod: $("#pureAudioPushMod").val(),
         });
     },function( error ){
         console.error("init error", error)

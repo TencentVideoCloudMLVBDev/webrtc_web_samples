@@ -1,3 +1,100 @@
+// canvas缁樺埗
+var canvasEle = document.getElementById("clock");
+var context = canvasEle.getContext("2d");
+
+function drawClock() {
+    context.clearRect(0, 0, canvasEle.width, canvasEle.height);
+
+    context.fillStyle = "#fff";
+    context.fillRect(0, 0, canvasEle.width, canvasEle.height);
+
+    var circleX = 200; // 鍦嗗績X鍧愭爣
+    var circleY = 200; // 鍦嗗績Y鍧愭爣
+    var radius = 190; // 鍗婂緞闀垮害
+
+    // 鑾峰彇鏃堕棿淇℃伅
+    var date = new Date();
+    var hour = date.getHours();
+    var min = date.getMinutes();
+    var sec = date.getSeconds();
+
+    // 鍒嗛拡璧颁竴鍦�60搴︼紝鏃堕拡璧�30搴�
+    // 搴︽暟杞寲涓哄姬搴�  搴︽暟*Math.PI/180
+    var hourValue = (-90 + 30 * hour + min / 2) * Math.PI / 180;
+    var minValue = (-90 + 6 * min) * Math.PI / 180;
+    var secValue = (-90 + 6 * sec) * Math.PI / 180;
+
+    // 缁樺埗琛ㄧ洏
+    context.beginPath();
+    context.font = "bold 16px Arial";
+    context.lineWidth = '3';
+    for (var i = 0; i < 12; i++) {
+        context.moveTo(circleX, circleY);
+        context.arc(circleX, circleY, radius, 30 * i * Math.PI / 180, 30 * (i + 1) * Math.PI / 180, false);
+    }
+    context.stroke();
+
+    context.fillStyle = '#0ff';
+    context.beginPath();
+    context.moveTo(circleX, circleY);
+    context.arc(circleX, circleY, radius * 19 / 20, 0, 360 * Math.PI / 180, false);
+    context.closePath();
+    context.fill();
+
+    // 缁樺埗閽熻〃涓績
+    context.beginPath();
+    context.arc(200, 200, 6, 0, 360, false);
+    context.fillStyle = "#000";
+    context.fill(); //鐢诲疄蹇冨渾
+    context.closePath();
+
+    // 缁樺埗鏃堕拡鍒诲害
+    context.lineWidth = '5';
+    context.beginPath();
+    context.moveTo(circleX, circleY);
+    context.arc(circleX, circleY, radius * 9 / 20, hourValue, hourValue, false);
+    context.stroke();
+
+    // 缁樺埗鍒嗛拡
+    context.lineWidth = '3';
+    context.beginPath();
+    context.moveTo(circleX, circleY);
+    context.arc(circleX, circleY, radius * 13 / 20, minValue, minValue, false);
+    context.stroke();
+
+    // 缁樺埗绉掗拡
+    context.lineWidth = '1';
+    context.beginPath();
+    context.moveTo(circleX, circleY);
+    context.arc(circleX, circleY, radius * 18 / 20, secValue, secValue, false);
+    context.stroke();
+
+
+    // 缁樺埗閽熻〃鐨勬暟瀛�
+    context.fillStyle = "#0ad";
+    context.fillText("12", 190, 34);
+    context.fillText("3", 370, 206);
+    context.fillText("6", 196, 378);
+    context.fillText("9", 22, 206);
+
+}
+setInterval(drawClock, 1000);
+drawClock();
+
+
+// canvas鎹曡幏涓簊tream canvasEle.captureStream(frameRate)
+var CanvasStream = canvasEle.captureStream(25);
+// 鑾峰彇闊抽娴侊紝骞跺皢闊宠建娣诲姞鍒版崟鑾风殑stream涓�
+navigator.mediaDevices.getUserMedia({
+    audio: true
+}, function (audioStream) {
+    CanvasStream.addTrack(audioStream.getAudioTracks()[0]);
+}, function (error) {
+    var errorMsg = "get user media failed : error = " + error.message;
+    console.error(errorMsg);
+});
+
+
 /*
     写在前面：
     为了保持在功能演示方面的简洁， demo不会做任何合法性校验
@@ -17,8 +114,11 @@ var sdkappid,
     accountType = 14418, // accounttype 还是在文档中会找到
     userSig,
     username,
-    streams = {},
-    screenSources = [];
+    streams = {
+        screen:null,
+        camera:null,
+        canvas:CanvasStream
+    };
 
 
 function onKickout() {
@@ -38,6 +138,7 @@ function createVideoElement(id, isLocal) {
 }
 
 function onLocalStreamAdd(info) {
+    console.error( 'onlocalstream ', info)
     if (info.stream && info.stream.active === true) {
         var id = "local";
         var video = document.getElementById(id);
@@ -82,74 +183,23 @@ function onWebSocketClose() {
     RTC.quit();
 }
 
-
-var audioDevices = [];
-
-
-function switchAudioDevice(){
-    
-    // 采取随机的方式设置麦克风
-    var index2 = Math.floor(Math.random() * audioDevices.length);
-
-    RTC.chooseAudioDevice( audioDevices[index2] );
+function startRTC( name ){
+    if( !streams[name] ) return;
+    RTC.stopRTC(0, function(){
+        RTC.startRTC({
+            screen: name == 'screen' ? true : false,
+            screenRole: name == 'screen' ?  "wp1280" : null,
+            stream: streams[name].clone()
+        });    
+    })
 }
 
-
-function getMediaStream( type ,callback ){
-    if( streams && streams[type] ){
-        callback( streams[type] )
-    }else if( type === 'screen' ){
-        /* 
-        | 参数                   | 类型       | 是否必须       | 描述            |
-        | -------------------- | -------- | ------------- |
-        | opts         | Object | 否 | 可以传空对象 {}    |
-        | succ         | function |是 |  成功回调      |
-        | fail         | function |否 |  失败回调      |
-
-        #### opts 的参数定义
-
-        | 参数                   | 类型       | 是否必须       | 描述            |
-        | -------------------- | -------- | ------------- |
-        | screen         | Boolean |否 | 是否采集屏幕分享 ,默认false   |
-        | screenSources | string   |否 | 屏幕分享采集的媒介 用半角逗号隔开， 可选选项包括  screen window tab audio | 具体表现请参考下图 |
-        | attributes         | Object |否 | 是否采集屏幕分享 ,默认false   |
-        | videoDevice         | Device |否 | 指定设备，getVideoDevices 获取的device item   |
-        | audioDevice         | Device |否 | 指定设备，getVideoDevices 获取的audio item   |
-
-        #### attributes 的参数定义
-        | width         | Boolean |否 | 分辨率宽度  |
-        | height         | Boolean |否 | 分辨率高度 |
-        | frameRate         | Boolean |否 | 帧率   |
-
-        */
-        RTC.getLocalStream({
-            screen: true,
-            screenSources: screenSources.join(","),
-            attributes:{
-                width:320,
-                height:320,
-                frameRate:10
-            }
-        },function(info){
-            streams['screen'] = info.stream
-            callback( info.stream )
-        });
-    }else if( type === 'camera' ){
-        RTC.getLocalStream({
-            attributes:{
-                width:640,
-                height:320,
-                frameRate:20
-            }
-        },function(info){
-            streams['camera'] = info.stream
-            callback( info.stream )
-        });
-    }     
-}
-
+//屏幕分享结束处理
+var screenEndHandler = null;
 
 function initRTC(opts) {
+    // 初始化
+    var screenSources = [];
 
     var checkList = ['screen', 'window', 'tab', 'audio']
 
@@ -162,43 +212,18 @@ function initRTC(opts) {
         userSig: opts.userSig,
         sdkAppId: opts.sdkappid,
         accountType: opts.accountType,
-        closeLocalMedia: true //手动调用推流接口
+        screenSources: screenSources.join(","),
+        closeLocalMedia: opts.closeLocalMedia
     }, function () {
+        
         RTC.createRoom({
             roomid: opts.roomid * 1,
             privateMapKey: opts.privateMapKey,
-            role: "user"
+            role: "wp1280"
         }, function (info) {
-            getMediaStream('screen' , function(stream){
-                RTC.startRTC({
-                    role:'wp1280',
-                    stream : stream.clone()
-                }, function (info) {
-                    console.debug('推流成功');
-                }, function (error) {
-                    console.error('推流失败', error)
-                });
-            });
-        });
-
-        //枚举麦克风
-        //为切换摄像头测试做准备
-        RTC.getAudioDevices(function(devices) {
-            audioDevices = devices
-            var deviceJsonList = [];
-            var html = '';
-            for(var a in devices){
-                console.debug( devices[a])
-                deviceJsonList.push({
-                    label: devices[a].label,
-                    deviceId: devices[a].deviceId
-                })
-                html += '<p>'+JSON.stringify({
-                    label: devices[a].label,
-                    deviceId: devices[a].deviceId
-                })+'</p>'
-            }
-            $("#audioDevices").html( html );
+        
+        }, function (error) {
+            console.error('error')
         });
     }, function (error) {
         console.error("init error", error)
@@ -215,17 +240,79 @@ function initRTC(opts) {
     // 服务器超时
     RTC.on("onRelayTimeout", onRelayTimeout)
     // just for debugging
-
     //监听SDK错误
     RTC.on("onErrorNotify", function (info) {
         console.error(info)
     });
+
+    //流通知
     RTC.on("onStreamNotify", function (info) {
         console.error('onStreamNotify', info)
+        if( info.isLocal ){
+            //本地流的变化通知
+            onLocalStreamHandle( info );
+        }else{
+            //远端流变化通知
+        }
     });
 }
+
+function onLocalStreamHandle( info ){
+    if( info.event === 'inactive' && (info.type ==='video' || info.type === 'stream') ){
+        screenEndHandler && screenEndHandler();
+        //执行完后要重置处理函数
+        screenEndHandler = null;
+    }
+}
+
+
+
 $("#userId").val("video_" + parseInt(Math.random() * 100000000));
 
+function getScreen() {
+
+    /* 
+    | 参数                   | 类型       | 是否必须       | 描述            |
+    | -------------------- | -------- | ------------- |
+    | opts         | Object | 否 | 可以传空对象 {}    |
+    | succ         | function |是 |  成功回调      |
+    | fail         | function |否 |  失败回调      |
+
+    #### opts 的参数定义
+
+    | 参数                   | 类型       | 是否必须       | 描述            |
+    | -------------------- | -------- | ------------- |
+    | screen         | Boolean |否 | 是否采集屏幕分享 ,默认false   |
+    | screenSources | string   |否 | 屏幕分享采集的媒介 用半角逗号隔开， 可选选项包括  screen window tab audio | 具体表现请参考下图 |
+    | attributes         | Object |否 | 是否采集屏幕分享 ,默认false   |
+    | videoDevice         | Device |否 | 指定设备，getVideoDevices 获取的device item   |
+    | audioDevice         | Device |否 | 指定设备，getVideoDevices 获取的audio item   |
+
+    #### attributes 的参数定义
+    | width         | Boolean |否 | 分辨率宽度  |
+    | height         | Boolean |否 | 分辨率高度 |
+    | frameRate         | Boolean |否 | 帧率   |
+
+    */
+    RTC.getLocalStream({
+    	screen: true,
+        screenSources: 'screen,window,tab,audio',
+        attributes:{
+            width:320,
+            height:320,
+            frameRate:10
+        }
+    },function(info){
+        document.getElementById("screenVideo").srcObject = info.stream
+        streams['screen'] = info.stream
+    });
+}
+function getCamera() {
+    RTC.getLocalStream(function(info){
+        document.getElementById("cameraVideo").srcObject = info.stream
+        streams['camera'] = info.stream
+    });
+}
 function push() {
     //推流
     login();
@@ -251,51 +338,6 @@ function screenshare() {
     });
     swit_flag = 'screen';
 }
-
-function swit(swit_flag) {
-    // swit_flag =  swit_flag == 'camera' ? 'screen' : 'camera';
-    console.error('switch to ' + swit_flag)
-    switch (swit_flag) {
-        case "camera":
-            RTC.stopRTC(0, function () {
-                console.debug('停止推流成功')
-                
-                getMediaStream('camera' , function(stream){
-                    RTC.startRTC({
-                        role:'wp1280',
-                        stream : stream.clone()
-                    }, function (info) {
-                        console.debug('推流成功[摄像头]');
-                    }, function (error) {
-                        console.error('推流失败[摄像头]', error)
-                    });
-                });
-            }, function () {
-                //RTC.startRTC(0);
-            });
-            break;
-        case "screen":
-            RTC.stopRTC(0, function () {
-                console.debug('停止推流成功')
-                getMediaStream('screen' , function(stream){
-                    RTC.startRTC({
-                        role:'wp1280',
-                        stream : stream.clone()
-                    }, function (info) {
-                        console.debug('推流成功[屏幕分享]');
-                    }, function (error) {
-                        console.error('推流失败[屏幕分享]', error)
-                    });
-                });
-            }, function () {
-                //RTC.startRTC(0);
-            });
-            break;
-        default:
-            break;
-    }
-}
-
 function audience() {
     //不推流
     login({

@@ -23,7 +23,7 @@
           <label for="userId">用户名:</label>
           <input class="form-control" id="userId" type="text" value="" />
           <label for="room-number">房间号:</label>
-          <input class="form-control" id="roomid" type="text" value="100906">
+          <input class="form-control" id="roomid" type="text" value="100910">
       </div>
       <button class="btn btn-default" type="button" onclick="detect()">屏幕分享插件检测</button>
       <br />
@@ -32,7 +32,7 @@
       <label for=""><input id="window" type="checkbox" value="window" checked> <span>window</span></label>
       <label for=""><input id="audio" type="checkbox" value="audio" checked> <span>audio</span></label>
       <label for=""><input id="tab" type="checkbox" value="tab" checked> <span>tab</span></label>
-      <button class="btn btn-default" type="button" onclick="screen()">屏幕分享</button>
+      <button class="btn btn-default" type="button" onclick="screenshare()">屏幕分享</button>
       <br />
       <button class="btn btn-default" type="button" onclick="push()">视频通话</button>
       <br />
@@ -46,6 +46,7 @@
   <div id="video-section" style="display: none">
     <button class="btn btn-default" type="button" onclick="swit('camera')">摄像头</button>
     <button class="btn btn-default" type="button" onclick="swit('screen')">屏幕分享</button>
+    <button class="btn btn-default" type="button" onclick="switchAudioDevice()">切换麦克风</button>
       <br />
         <div id="remote-video-wrap">
 

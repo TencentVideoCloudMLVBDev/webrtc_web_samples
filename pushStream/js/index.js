@@ -114,6 +114,7 @@ var sdkappid,
     accountType = 14418, // accounttype 还是在文档中会找到
     userSig,
     username,
+    screenSources = [],
     streams = {
         screen:null,
         camera:null,
@@ -187,8 +188,7 @@ function startRTC( name ){
     if( !streams[name] ) return;
     RTC.stopRTC(0, function(){
         RTC.startRTC({
-            screen: name == 'screen' ? true : false,
-            screenRole: name == 'screen' ?  "wp1280" : null,
+            role: name == 'screen' ?  "wp1280" : 'user',
             stream: streams[name].clone()
         });    
     })
@@ -198,8 +198,6 @@ function startRTC( name ){
 var screenEndHandler = null;
 
 function initRTC(opts) {
-    // 初始化
-    var screenSources = [];
 
     var checkList = ['screen', 'window', 'tab', 'audio']
 
@@ -269,49 +267,72 @@ function onLocalStreamHandle( info ){
 
 $("#userId").val("video_" + parseInt(Math.random() * 100000000));
 
+
+
+function getMediaStream( type ,callback ){
+    if( streams && streams[type] ){
+        callback( streams[type] )
+    }else if( type === 'screen' ){
+        /* 
+        | 参数                   | 类型       | 是否必须       | 描述            |
+        | -------------------- | -------- | ------------- |
+        | opts         | Object | 否 | 可以传空对象 {}    |
+        | succ         | function |是 |  成功回调      |
+        | fail         | function |否 |  失败回调      |
+
+        #### opts 的参数定义
+
+        | 参数                   | 类型       | 是否必须       | 描述            |
+        | -------------------- | -------- | ------------- |
+        | screen         | Boolean |否 | 是否采集屏幕分享 ,默认false   |
+        | screenSources | string   |否 | 屏幕分享采集的媒介 用半角逗号隔开， 可选选项包括  screen window tab audio | 具体表现请参考下图 |
+        | attributes         | Object |否 | 是否采集屏幕分享 ,默认false   |
+        | videoDevice         | Device |否 | 指定设备，getVideoDevices 获取的device item   |
+        | audioDevice         | Device |否 | 指定设备，getVideoDevices 获取的audio item   |
+
+        #### attributes 的参数定义
+        | width         | Boolean |否 | 分辨率宽度  |
+        | height         | Boolean |否 | 分辨率高度 |
+        | frameRate         | Boolean |否 | 帧率   |
+
+        */
+        RTC.getLocalStream({
+            screen: true,
+            screenSources: screenSources.join(","),
+            attributes:{
+                width:320,
+                height:320,
+                frameRate:10
+            }
+        },function(info){
+            streams['screen'] = info.stream
+            callback( info.stream )
+        });
+    }else if( type === 'camera' ){
+        RTC.getLocalStream({
+            attributes:{
+                width:640,
+                height:320,
+                frameRate:20
+            }
+        },function(info){
+            streams['camera'] = info.stream
+            callback( info.stream )
+        });
+    }     
+}
+
+
+
 function getScreen() {
-
-    /* 
-    | 参数                   | 类型       | 是否必须       | 描述            |
-    | -------------------- | -------- | ------------- |
-    | opts         | Object | 否 | 可以传空对象 {}    |
-    | succ         | function |是 |  成功回调      |
-    | fail         | function |否 |  失败回调      |
-
-    #### opts 的参数定义
-
-    | 参数                   | 类型       | 是否必须       | 描述            |
-    | -------------------- | -------- | ------------- |
-    | screen         | Boolean |否 | 是否采集屏幕分享 ,默认false   |
-    | screenSources | string   |否 | 屏幕分享采集的媒介 用半角逗号隔开， 可选选项包括  screen window tab audio | 具体表现请参考下图 |
-    | attributes         | Object |否 | 是否采集屏幕分享 ,默认false   |
-    | videoDevice         | Device |否 | 指定设备，getVideoDevices 获取的device item   |
-    | audioDevice         | Device |否 | 指定设备，getVideoDevices 获取的audio item   |
-
-    #### attributes 的参数定义
-    | width         | Boolean |否 | 分辨率宽度  |
-    | height         | Boolean |否 | 分辨率高度 |
-    | frameRate         | Boolean |否 | 帧率   |
-
-    */
-    RTC.getLocalStream({
-    	screen: true,
-        screenSources: 'screen,window,tab,audio',
-        attributes:{
-            width:320,
-            height:320,
-            frameRate:10
-        }
-    },function(info){
-        document.getElementById("screenVideo").srcObject = info.stream
-        streams['screen'] = info.stream
-    });
+    getMediaStream('screen', function(stream){
+        document.getElementById("screenVideo").srcObject = stream
+    })
 }
 function getCamera() {
-    RTC.getLocalStream(function(info){
-        document.getElementById("cameraVideo").srcObject = info.stream
-        streams['camera'] = info.stream
-    });
+    getMediaStream('camera', function(stream){
+        document.getElementById("cameraVideo").srcObject = stream
+    })
 }
 function push() {
     //推流

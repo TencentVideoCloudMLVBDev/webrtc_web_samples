@@ -51,6 +51,19 @@ function onLocalStreamAdd(info) {
         }
         audio.srcObject = info.stream;
     }
+    // 分析音频流
+    var meter = WebRTCAPI.SoundMeter({
+        stream: info.stream,
+        onprocess: function( data ){
+            $("#volume").val( data.volume)
+            $("#volume_str").text( "volume: "+ data.volume)
+            $("#status").text( data.status )
+        }
+    })
+
+    // 停止分析音频流
+    // meter.stop();
+
 }
 
 
@@ -90,7 +103,6 @@ function initRTC(opts){
         "privateMapKey": opts.privateMapKey,
         "sdkAppId": opts.sdkappid,
         "accountType": opts.accountType,
-        "closeLocalMedia": false,
         "video": false
     },function(){
         RTC.createRoom({
@@ -112,6 +124,9 @@ function initRTC(opts){
     RTC.on("onRemoteStreamRemove",onRemoteStreamRemove)
     // 重复登录被T
     RTC.on("onKickout",onKickout)
+    RTC.on("onErrorNotify",function(e){
+        console.error(e)
+    })
     // 服务器超时
     RTC.on("onRelayTimeout",onRelayTimeout)
     // just for debugging

@@ -186,12 +186,19 @@ function onWebSocketClose() {
 
 function startRTC( name ){
     if( !streams[name] ) return;
-    RTC.stopRTC(0, function(){
+    if( RTC.global.localStream ){
+        console.debug( 'update ')
+        RTC.updateStream({
+            role:name == 'screen' ?  "wp1280" : 'user',
+            stream: streams[name].clone()
+        });
+    }else{
         RTC.startRTC({
             role: name == 'screen' ?  "wp1280" : 'user',
             stream: streams[name].clone()
-        });    
-    })
+        });
+    }
+
 }
 
 //屏幕分享结束处理

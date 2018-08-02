@@ -106,7 +106,7 @@ function initRTC(opts){
         "video": false
     },function(){
         RTC.createRoom({
-            roomId : opts.roomid * 1,
+            roomid : opts.roomid * 1,
             privateMapKey: opts.privateMapKey,
             role : "user",
             recordId: $("#recordId").val() || null,

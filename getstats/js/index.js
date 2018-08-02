@@ -52,7 +52,7 @@ function onLocalStreamAdd(info) {
     }
 }
 
-
+var hasInitStats = {};
 function onRemoteStreamUpdate( info ) {
     console.debug( info )
     if (info.stream && info.stream.active === true)
@@ -66,6 +66,33 @@ function onRemoteStreamUpdate( info ) {
     } else{
         console.log('欢迎用户'+ info.userId+ '加入房间');
     }
+
+    
+    if( hasInitStats[info.userId] ){
+        return;
+    }
+    hasInitStats[info.userId] = true;
+    RTC.getStats({
+        userId: info.userId ,
+        interval: 2000 //2秒获取数据
+    },function(result){
+        //接收端数据
+        var data = {
+            recv: bytesToSize(result.audio.bytesReceived + result.video.bytesReceived),
+            width: result.resolutions.recv.width,
+            height: result.resolutions.recv.height,
+            audioPacketsReceived: result.audio.packetsReceived,
+            audioPacketsLost: result.audio.packetsLost,
+            videoPacketsReceived: result.video.packetsReceived,
+            videoPacketsLost: result.video.packetsLost,
+        }
+        console.debug( ' recv ', data)
+        //test 代码
+        //10秒后停止数据统计
+        setTimeout(function(){
+            result.nomore();
+        },10000);
+    });
 }
 
 
@@ -104,13 +131,25 @@ function initRTC(opts){
                 userId:0, //不传或者设置为0 ，为获取当前本端数据
                 interval: 2000 //2秒获取数据
             },function(result){
-                console.debug( result );
-                renderData("self", {
+
+                //推流端数据
+                var data = {
                     bandwidth: bytesToSize(result.bandwidth.speed),
-                    resolution: result.resolutions.send.width + "x"+result.resolutions.send.height,
                     send: bytesToSize(result.audio.bytesSent + result.video.bytesSent),
-                    recv: bytesToSize(result.audio.bytesReceived + result.video.bytesReceived)
-                })
+                    width: result.resolutions.send.width,
+                    height: result.resolutions.send.height,
+                    audioPacketsSent: result.audio.packetsSent,
+                    videoPacketsSent: result.video.packetsSent,
+                    videoPacketsLost: result.video.packetsLost
+                };
+                console.debug( ' send ' ,data)
+
+                //test 代码
+                //10秒后停止数据统计
+                setTimeout(function(){
+                    result.nomore();
+                },10000);
+
             });
         });;
     },function( error ){
@@ -127,6 +166,9 @@ function initRTC(opts){
     RTC.on("onKickout",onKickout)
     // 服务器超时
     RTC.on("onRelayTimeout",onRelayTimeout)
+    RTC.on("onQualityReport",function( data ){
+        // console.error( 'onQualityReport',data );
+    })
     // just for debugging
     // RTC.on("*",function(e){
     //     console.debug(e)
@@ -275,7 +317,6 @@ function renderData(id,data){
 
 function replaceWith(str, name , value){
     var regex = new RegExp("#"+name+"#","gim");
-    console.debug(regex);
     str = str.replace(regex, value)
     return str;
 }

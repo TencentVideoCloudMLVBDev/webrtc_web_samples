@@ -32,20 +32,19 @@
       <label for=""><input id="window" type="checkbox" value="window" checked> <span>window</span></label>
       <label for=""><input id="audio" type="checkbox" value="audio" checked> <span>audio</span></label>
       <label for=""><input id="tab" type="checkbox" value="tab" checked> <span>tab</span></label>
-      <button class="btn btn-default" type="button" onclick="screenshare()">屏幕分享</button>
+      <button class="btn btn-default" type="button" onclick="start('screen')">屏幕分享</button>
       <br />
-      <button class="btn btn-default" type="button" onclick="push()">视频通话</button>
+      <button class="btn btn-default" type="button" onclick="start('camera')">视频通话</button>
       <br />
-      <button class="btn btn-default" type="button" onclick="audience()">观看</button>
+      <button class="btn btn-default" type="button" onclick="start('audience')">观看</button>
       <p>注意：如果房间已经存在，则加入房间</p>
     </div>
   </div>
   <!-- 登录  -->
-
   <!-- RTC  -->
   <div id="video-section" style="display: none">
-    <button class="btn btn-default" type="button" onclick="swit('camera')">摄像头</button>
-    <button class="btn btn-default" type="button" onclick="swit('screen')">屏幕分享</button>
+    <button class="btn btn-default" type="button" onclick="getCamera()">摄像头</button>
+    <button class="btn btn-default" type="button" onclick="getScreen()">屏幕分享</button>
     <button class="btn btn-default" type="button" onclick="switchAudioDevice()">切换麦克风</button>
       <br />
         <div id="remote-video-wrap">

@@ -131,7 +131,7 @@ function initRTC(opts){
                 userId:0, //不传或者设置为0 ，为获取当前本端数据
                 interval: 2000 //2秒获取数据
             },function(result){
-
+                console.debug( result );
                 //推流端数据
                 var data = {
                     bandwidth: bytesToSize(result.bandwidth.speed),

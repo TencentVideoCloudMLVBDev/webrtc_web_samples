@@ -17,9 +17,12 @@ var sdkappid,
     accountType = 14418, // accounttype 还是在文档中会找到
     userSig,
     username,
-    streams = {},
+    streams = {
+        screen:null,
+        camera:null
+    },
     screenSources = [];
-
+var audioDevices = [];
 
 function onKickout() {
     alert("on kick out!");
@@ -78,21 +81,69 @@ function onRemoteStreamRemove(info) {
     }
 }
 
-function onWebSocketClose() {
-    RTC.quit();
-}
-
-
-var audioDevices = [];
-
-
 function switchAudioDevice(){
-    
     // 采取随机的方式设置麦克风
     var index2 = Math.floor(Math.random() * audioDevices.length);
-
     RTC.chooseAudioDevice( audioDevices[index2] );
 }
+
+
+function initRTC(opts) {
+
+    var checkList = ['screen', 'window', 'tab', 'audio']
+    checkList.forEach(function (item) {
+        if ($("#" + item).prop("checked"))
+            screenSources.push(item);
+    })
+    //初始化
+    window.RTC = new WebRTCAPI({
+        userId: opts.userId,
+        userSig: opts.userSig,
+        sdkAppId: opts.sdkappid,
+        accountType: opts.accountType,
+        closeLocalMedia: true //手动调用推流接口
+    });
+
+    //枚举麦克风
+    //为切换摄像头测试做准备
+    RTC.getAudioDevices(function(devices) {
+        audioDevices = devices
+        var deviceJsonList = [];
+        var html = '';
+        for(var a in devices){
+            console.debug( devices[a])
+            deviceJsonList.push({
+                label: devices[a].label,
+                deviceId: devices[a].deviceId
+            })
+            html += '<p>'+JSON.stringify({
+                label: devices[a].label,
+                deviceId: devices[a].deviceId
+            })+'</p>'
+        }
+        $("#audioDevices").html( html );
+    });
+
+    // 远端流新增/更新
+    RTC.on("onRemoteStreamUpdate", onRemoteStreamUpdate)
+    // 本地流新增
+    RTC.on("onLocalStreamAdd", onLocalStreamAdd)
+    // 远端流断开
+    RTC.on("onRemoteStreamRemove", onRemoteStreamRemove)
+    // 重复登录被T
+    RTC.on("onKickout", onKickout)
+    // 服务器超时
+    RTC.on("onRelayTimeout", onRelayTimeout)
+    // just for debugging
+    //监听SDK错误
+    RTC.on("onErrorNotify", function (info) {
+        console.error(info)
+    });
+    RTC.on("onStreamNotify", function (info) {
+        console.error('onStreamNotify', info)
+    });
+}
+$("#userId").val("video_" + parseInt(Math.random() * 100000000));
 
 
 function getMediaStream( type ,callback ){
@@ -132,7 +183,10 @@ function getMediaStream( type ,callback ){
             }
         },function(info){
             streams['screen'] = info.stream
+            console.debug('getLocalStream succ', info.stream)
             callback( info.stream )
+        },function(error){
+            console.error('failed', error)
         });
     }else if( type === 'camera' ){
         RTC.getLocalStream({
@@ -142,94 +196,76 @@ function getMediaStream( type ,callback ){
                 frameRate:20
             }
         },function(info){
+            console.debug('getLocalStream succ', info.stream)
             streams['camera'] = info.stream
             callback( info.stream )
+        },function(error){
+            console.error('failed', error)
         });
     }     
 }
 
 
-function initRTC(opts) {
-
-    var checkList = ['screen', 'window', 'tab', 'audio']
-
-    checkList.forEach(function (item) {
-        if ($("#" + item).prop("checked"))
-            screenSources.push(item);
+function getScreen() {
+    getMediaStream('screen', function(stream){
+        startRTC('screen');
     })
-    window.RTC = new WebRTCAPI({
-        userId: opts.userId,
-        userSig: opts.userSig,
-        sdkAppId: opts.sdkappid,
-        accountType: opts.accountType,
-        closeLocalMedia: true //手动调用推流接口
-    }, function () {
+}
+function getCamera() {
+    getMediaStream('camera', function(stream){
+        startRTC('camera');
+    })
+}
+
+function start( name ){
+    login( function(){
+        switch( name ){
+            case 'audience':
+                startRTC( 'audience' )
+                break;
+            case 'screen':
+                getScreen();
+                break;
+            case 'camera':
+                getCamera();
+                break;
+        }
+    });
+}
+
+
+function startRTC( name ){
+    if( !streams[name] && name !=='audience' ) return;
+    var stream = streams[name];
+    if( RTC.global.localStream ){
+        console.debug( 'update ')
+        //无需房间，更新流
+        RTC.updateStream({
+            role:name == 'screen' ?  "wp1280" : 'user',
+            stream: streams[name].clone()
+        });
+    }else{
+        //进入房间，进行推流
         RTC.createRoom({
-            roomid: opts.roomid * 1,
-            privateMapKey: opts.privateMapKey,
-            role: "user"
+            roomid: $("#roomid").val() * 1,
+            role: name == 'screen' ?  "wp1280" : 'user',
         }, function (info) {
-            getMediaStream('screen' , function(stream){
-                RTC.startRTC({
-                    role:'wp1280',
-                    stream : stream.clone()
-                }, function (info) {
-                    console.debug('推流成功');
-                }, function (error) {
-                    console.error('推流失败', error)
-                });
-            });
-        });
-
-        //枚举麦克风
-        //为切换摄像头测试做准备
-        RTC.getAudioDevices(function(devices) {
-            audioDevices = devices
-            var deviceJsonList = [];
-            var html = '';
-            for(var a in devices){
-                console.debug( devices[a])
-                deviceJsonList.push({
-                    label: devices[a].label,
-                    deviceId: devices[a].deviceId
-                })
-                html += '<p>'+JSON.stringify({
-                    label: devices[a].label,
-                    deviceId: devices[a].deviceId
-                })+'</p>'
+            if( name ==='audience') {
+                return;
             }
-            $("#audioDevices").html( html );
+            RTC.startRTC({
+                stream : stream.clone()
+            }, function (info) {
+                console.debug('推流成功');
+            }, function (error) {
+                console.error('推流失败', error)
+            });
+        },function(error){
+            console.error('进房失败', error)
         });
-    }, function (error) {
-        console.error("init error", error)
-    });
-
-    // 远端流新增/更新
-    RTC.on("onRemoteStreamUpdate", onRemoteStreamUpdate)
-    // 本地流新增
-    RTC.on("onLocalStreamAdd", onLocalStreamAdd)
-    // 远端流断开
-    RTC.on("onRemoteStreamRemove", onRemoteStreamRemove)
-    // 重复登录被T
-    RTC.on("onKickout", onKickout)
-    // 服务器超时
-    RTC.on("onRelayTimeout", onRelayTimeout)
-    // just for debugging
-
-    //监听SDK错误
-    RTC.on("onErrorNotify", function (info) {
-        console.error(info)
-    });
-    RTC.on("onStreamNotify", function (info) {
-        console.error('onStreamNotify', info)
-    });
+    }
 }
-$("#userId").val("video_" + parseInt(Math.random() * 100000000));
 
-function push() {
-    //推流
-    login();
-}
 
 function detect() {
     WebRTCAPI.fn.detectRTC(function (data) {
@@ -242,69 +278,8 @@ function detect() {
     });
 }
 
-var swit_flag = 'camera'
 
-function screenshare() {
-    //推流
-    login({
-        screen: true
-    });
-    swit_flag = 'screen';
-}
-
-function swit(swit_flag) {
-    // swit_flag =  swit_flag == 'camera' ? 'screen' : 'camera';
-    console.error('switch to ' + swit_flag)
-    switch (swit_flag) {
-        case "camera":
-            RTC.stopRTC(0, function () {
-                console.debug('停止推流成功')
-                
-                getMediaStream('camera' , function(stream){
-                    RTC.startRTC({
-                        role:'wp1280',
-                        stream : stream.clone()
-                    }, function (info) {
-                        console.debug('推流成功[摄像头]');
-                    }, function (error) {
-                        console.error('推流失败[摄像头]', error)
-                    });
-                });
-            }, function () {
-                //RTC.startRTC(0);
-            });
-            break;
-        case "screen":
-            RTC.stopRTC(0, function () {
-                console.debug('停止推流成功')
-                getMediaStream('screen' , function(stream){
-                    RTC.startRTC({
-                        role:'wp1280',
-                        stream : stream.clone()
-                    }, function (info) {
-                        console.debug('推流成功[屏幕分享]');
-                    }, function (error) {
-                        console.error('推流失败[屏幕分享]', error)
-                    });
-                });
-            }, function () {
-                //RTC.startRTC(0);
-            });
-            break;
-        default:
-            break;
-    }
-}
-
-function audience() {
-    //不推流
-    login({
-        closeLocalMedia: true
-    });
-}
-
-
-Bom = {
+var Bom = {
     /**
      * @description 读取location.search
      *
@@ -323,7 +298,7 @@ Bom = {
     }
 };
 
-function login(opt) {
+function login( callback ) {
     sdkappid = Bom.query("sdkappid") || $("#sdkappid").val();
     userId = $("#userId").val();
     //请使用英文半角/数字作为用户名
@@ -341,22 +316,20 @@ function login(opt) {
         }),
         success: function (json) {
             if (json && json.errorCode === 0) {
-                //一会儿进入房间要用到
                 var userSig = json.data.userSig;
-                var privateMapKey = json.data.privMapEncrypt;
-                // 页面处理，显示视频流页面
                 $("#video-section").show();
                 $("#input-container").hide();
                 initRTC({
                     "userId": userId,
                     "userSig": userSig,
-                    "privateMapKey": privateMapKey,
                     "sdkappid": sdkappid,
                     "accountType": accountType,
-                    "closeLocalMedia": opt && opt.closeLocalMedia,
-                    "screen": (opt && opt.screen) || false,
                     "roomid": $("#roomid").val()
                 });
+
+                if( callback ) {
+                    callback();
+                }
             } else {
                 console.error(json);
             }

@@ -198,7 +198,6 @@ function startRTC( name ){
             stream: streams[name].clone()
         });
     }
-
 }
 
 //屏幕分享结束处理
@@ -423,7 +422,6 @@ function login(opt) {
                 initRTC({
                     "userId": userId,
                     "userSig": userSig,
-                    "privateMapKey": privateMapKey,
                     "sdkappid": sdkappid,
                     "accountType": accountType,
                     "screen": (opt && opt.screen) || false,

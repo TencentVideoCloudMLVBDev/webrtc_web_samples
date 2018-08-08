@@ -204,6 +204,9 @@ function startRTC( name ){
 //屏幕分享结束处理
 var screenEndHandler = null;
 
+
+
+
 function initRTC(opts) {
 
     var checkList = ['screen', 'window', 'tab', 'audio']
@@ -218,21 +221,10 @@ function initRTC(opts) {
         sdkAppId: opts.sdkappid,
         accountType: opts.accountType,
         screenSources: screenSources.join(","),
-        closeLocalMedia: opts.closeLocalMedia
-    }, function () {
-        
-        RTC.createRoom({
-            roomid: opts.roomid * 1,
-            privateMapKey: opts.privateMapKey,
-            role: "wp1280"
-        }, function (info) {
-        
-        }, function (error) {
-            console.error('error')
-        });
-    }, function (error) {
-        console.error("init error", error)
+        closeLocalMedia: true
     });
+
+
 
     // 远端流新增/更新
     RTC.on("onRemoteStreamUpdate", onRemoteStreamUpdate)
@@ -366,18 +358,23 @@ function detect() {
 
 var swit_flag = 'camera'
 
-function screenshare() {
-    //推流
-    login({
-        screen: true
-    });
-    swit_flag = 'screen';
+function init() {
+    login();
 }
-function audience() {
-    //不推流
-    login({
-        closeLocalMedia: true
-    });
+
+function connect(){
+    RTC.connect(function () {
+        RTC.createRoom({
+            roomid: parseInt($("#roomid").val()),
+            role: "wp1280"
+        }, function (info) {
+        
+        }, function (error) {
+            console.error('error')
+        });
+    }, function (error) {
+        console.error("connect error", error)
+    })
 }
 
 
@@ -420,7 +417,6 @@ function login(opt) {
             if (json && json.errorCode === 0) {
                 //一会儿进入房间要用到
                 var userSig = json.data.userSig;
-                var privateMapKey = json.data.privMapEncrypt;
                 // 页面处理，显示视频流页面
                 $("#video-section").show();
                 $("#input-container").hide();
@@ -430,7 +426,6 @@ function login(opt) {
                     "privateMapKey": privateMapKey,
                     "sdkappid": sdkappid,
                     "accountType": accountType,
-                    "closeLocalMedia": opt && opt.closeLocalMedia,
                     "screen": (opt && opt.screen) || false,
                     "roomid": $("#roomid").val()
                 });

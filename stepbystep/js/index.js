@@ -87,6 +87,25 @@ function onWebSocketClose() {
     RTC.quit();
 }
 
+function connect(){
+    RTC.connect(function (data) {
+        console.debug('connect succ', data)
+    }, function (error) {
+        console.error('connect failed', error)
+    });
+}
+
+function enter(){
+    RTC.createRoom({
+        roomid: parseInt($("#roomid").val()),
+        role: "user",
+    }, function (info) {
+        console.warn("init succ", info)
+    }, function (error) {
+        console.error("init error", error)
+    });
+}
+
 function initRTC(opts) {
     // 初始化
     // opts.userId="xiaolin";
@@ -102,27 +121,7 @@ function initRTC(opts) {
         wsRetryMaxTimes: 5, //最大重连次数 
         wsRetryDist: 3000, //毫秒 ，首次间隔3000毫秒， 第N次重连间隔 为 N * DIST （ 2 * 3000） 
         closeLocalMedia: opts.closeLocalMedia
-    }, function () {
-        RTC.createRoom({
-            roomid: opts.roomid * 1,
-            privateMapKey: opts.privateMapKey,
-            role: "user",
-            // role : "wp1280",
-            /* constraints: { 
-                video: devices.video[1],
-                audio:devices.audio[1]
-            } */
-            // pstnBizType: parseInt($("#pstnBizType").val() || 0),
-            // pstnPhoneNumber:  $("#pstnPhoneNumber").val()
-        }, function (info) {
-            console.warn("init succ", info)
-        }, function (error) {
-            console.error("init error", error)
-        });
-    }, function (error) {
-        // console.warn("init error", error)
     });
-
     // 远端流新增/更新
     RTC.on("onRemoteStreamUpdate", onRemoteStreamUpdate)
     // 本地流新增

@@ -23,6 +23,12 @@ function onKickout() {
     alert("on kick out!");
 }
 
+var i = 0;
+function switchRole() {
+    i++;
+    RTC.changeSpearRole(i%2 == 0 ? "wp1280":"user");
+}
+
 function onRelayTimeout(msg) {
     alert("onRelayTimeout!" + (msg ? JSON.stringify(msg) : ""));
 }
@@ -95,7 +101,10 @@ function initRTC(opts){
     },function(){
         RTC.createRoom({
             roomid : opts.roomid * 1,
-            role : "user"
+            role : "user",
+            constraints:{
+                video:videoDevices[1]
+            }
         });
     },function( error ){
         console.error("init error", error)
@@ -166,7 +175,6 @@ function listDevices(){
         $("#audioDevices").html( html );
     });
 }
-
 
 // 切换设备
 function switchVideoDevice() {

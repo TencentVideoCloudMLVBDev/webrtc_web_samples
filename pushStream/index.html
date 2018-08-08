@@ -31,7 +31,7 @@
       <label for=""><input id="audio" type="checkbox" value="audio" checked> <span>audio</span></label>
       <label for=""><input id="tab" type="checkbox" value="tab" checked> <span>tab</span></label>
       
-      <button class="btn btn-default" type="button" onclick="audience()">进入房间</button>
+      <button class="btn btn-default" type="button" onclick="init()">初始化</button>
       <p>注意：如果房间已经存在，则加入房间</p>
     </div>
     <canvas id="clock" ></canvas>
@@ -41,6 +41,7 @@
 
   <!-- RTC  -->
   <div id="video-section" style="display: none">
+    <button class="btn btn-default" type="button" onclick="connect()">进入房间</button>
     <button class="btn btn-default" type="button" onclick="getScreen()">采集屏幕</button>
     <button class="btn btn-default" type="button" onclick="getCamera()">采集摄像头</button>
     <button class="btn btn-default" type="button" onclick="startRTC('camera')">推摄像头</button>

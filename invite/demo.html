@@ -6,8 +6,8 @@
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <link href='./css/bootstrap.css' rel="stylesheet">
   <link href='./css/style.css' rel='stylesheet'>
-  <link rel="stylesheet" href="../assets/css/pure-min.css">
-  <link rel="stylesheet" href="../assets/css/baby-blue.css">
+  <!-- <link rel="stylesheet" href="../assets/css/pure-min.css">
+  <link rel="stylesheet" href="../assets/css/baby-blue.css"> -->
 </head>
 <body>
 
@@ -21,26 +21,18 @@
           <input class="form-control" id="sdkappid" type="text" value="1400037025" />
         </div>
           <label for="userId">用户名:</label>
-          <input class="form-control" id="userId" type="text" value="" />
+          <input class="form-control" id="userId" type="text" value="" readonly/>
           <label for="room-number">房间号:</label>
-          <input class="form-control" id="roomid" type="text" value="100908">
+          <input class="form-control" id="roomid" type="text" value="900099" readonly/>
       </div>
-      <button class="btn btn-default" type="button" onclick="push()">进入房间</button>
-      <p>注意：如果房间已经存在，则加入房间</p>
+      <button class="btn btn-default" type="button" onclick="invite()">发起视频通话</button>
+      <p>向房间内其他用户发起视频通话邀请</p>
     </div>
   </div>
   <!-- 登录  -->
 
   <!-- RTC  -->
   <div id="video-section" style="display: none">
-    <p><button onclick="listDevices()">枚举设备</button></p>
-    <h4>摄像头</h4>
-    <div id="videoDevices"></div>
-    <h4>麦克风</h4>
-    <div id="audioDevices"></div>
-    <p><button onclick="switchVideoDevice()">随机切换摄像头</button></p>
-    <p><button onclick="switchAudioDevice()">随机切换麦克风</button></p>
-    <p><button onclick="switchRole()">切换角色</button></p>
         <div id="remote-video-wrap">
 
         </div>
@@ -48,10 +40,29 @@
   </div>
   <!-- RTC  -->
 
+  <!-- Dialog -->
+  <div id="input-container" class="container">
+    <div class="dialog-box">
+      <dialog id="receive-invite-dialog">
+        <p>收到视频邀请</p>
+        <button id="accept-btn" onclick="accept()">接受</button>
+        <!-- <button id="refuse" onclick="refuse()">拒绝</button> -->
+      </dialog>
+    </div>
+  </div>
+  <!-- Dialog -->
+
+
   <!-- jquery Demo用到，WebRTCAPI不依赖 -->
   <script src="../assets/libs/jquery.min.js"></script>
   <script src="../assets/libs/vconsole.min.js"></script>
-  <script src="../dist/WebRTCAPI.min.js"></script>
+  <script>
+    // var vConsole = new VConsole();
+  </script>
+  <!-- WebRTC SDK -->
+  <script src="https://sqimg.qq.com/expert_qq/webrtc/2.4/WebRTCAPI.min.js"></script>
+  <!-- WebIM SDK -->
+  <script src="https://sqimg.qq.com/expert_qq/webim/1.7.1/webim.min.js"></script>
   <script>
     document.write('<script src="./js/index.js?v='+new Date()+'" type="text/javascript"></scr'+'ipt>')
   </script>
@@ -67,6 +78,5 @@
             s.parentNode.insertBefore(mta, s);
         })();
     </script>
-  
-<!-- Global site tag (gtag.js) - Google Analytics --> <script async src="https://www.googletagmanager.com/gtag/js?id=UA-121844058-1"></script> <script>   window.dataLayer = window.dataLayer || [];   function gtag(){dataLayer.push(arguments);}   gtag('js', new Date());    gtag('config', 'UA-121844058-1'); </script></body>
+</body>
 </html>

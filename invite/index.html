@@ -1,0 +1,50 @@
+<html><head>
+  <title>WEBRTC Demo</title>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <link href="./css/bootstrap.css" rel="stylesheet">
+  <link href="./css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/pure-min.css">
+  <link rel="stylesheet" href="../assets/css/baby-blue.css">
+  <style>
+  .markdown-section a {
+    color: #4183c4;
+    text-decoration: none;
+    background: 0 0;
+}</style>
+</head>
+<body>
+<div id="input-container" class="container">
+  <div class="search-noresults">
+    <section class="normal markdown-section">
+      <h2 id="视频邀请页">视频邀请页</h2>
+      <p>WebRTC提供视频通讯功能，在需要发送视频邀请的场景下，可以结合<a href="https://cloud.tencent.com/document/product/269" target="_blank">腾讯云云通信组件--IMSDK</a>实现视频邀请的发送与接受。</p>
+      <hr/>
+
+      <h4 id="1-在页面中加载webrtcapiminjs">1. 在页面中加载WebRTCApi.min.js</h4>
+      <p>建议采用腾讯云提供的CDN地址加载WebRTCApi.min.js。</p>
+      <pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://sqimg.qq.com/expert_qq/webrtc/2.5/WebRTCAPI.min.js"</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span><span></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+      </code></pre>
+
+      <h4 id="2. 在页面中加载webim.min.js">2. 在页面中加载webim.min.js</h4>
+      <p>建议采用腾讯云提供的CDN地址加载云通信组件webim.min.js。</p>
+      <pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://sqimg.qq.com/expert_qq/webim/1.7.1/webim.min.js"</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span><span></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+      </code></pre>
+      <hr/>
+
+      <h4 id="canvas推流demo">视频邀请页Demo</h3>
+      <p><a href="./demo.html" target="_blank">./demo.html</a></p>
+      <hr/>
+      <h4 id="Demo使用步骤">Demo使用步骤</h4>
+      <p>1.至少打开两个Demo页面；</p>
+      <p>2.在其中一个页面中点击“发起视频通话”按钮；</p>
+      <p>3.在其它页面中弹出“收到视频邀请”弹窗，点击接受后，开始视频通话。</p>
+      <hr/>
+
+      <h4 id="了解更多">了解更多</h4>
+      <p><a href="https://cloud.tencent.com/document/product/269" target="_blank">腾讯云云通信组件--IMSDK</a></p>
+
+    </section>
+  </div>
+</div>
+</body></html>

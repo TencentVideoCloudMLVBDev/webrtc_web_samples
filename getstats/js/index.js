@@ -138,8 +138,8 @@ function initRTC(opts){
                     send: bytesToSize(result.audio.bytesSent + result.video.bytesSent),
                     width: result.resolutions.send.width,
                     height: result.resolutions.send.height,
-                    audioPacketsSent: result.audio.packetsSent,
-                    videoPacketsSent: result.video.packetsSent,
+                    audioPacketsSent: result.audio.packetsSent || 0,
+                    videoPacketsSent: result.video.packetsSent || 0,
                     videoPacketsLost: result.video.packetsLost
                 };
                 console.debug( ' send ' ,data)

@@ -23,9 +23,11 @@
           <label for="userId">用户名:</label>
           <input class="form-control" id="userId" type="text" value="" />
           <label for="room-number">房间号:</label>
-          <input class="form-control" id="roomid" type="text" value="100908">
+          <input class="form-control" id="roomid" type="text" value="12211">
       </div>
-      <button class="btn btn-default" type="button" onclick="push()">进入房间</button>
+      <button class="btn btn-default" type="button" onclick="push()">初始化（我要视频通话）</button>
+      <br />
+      <button class="btn btn-default" type="button" onclick="audience()">初始化（我要观看）</button>
       <p>注意：如果房间已经存在，则加入房间</p>
     </div>
   </div>
@@ -33,14 +35,11 @@
 
   <!-- RTC  -->
   <div id="video-section" style="display: none">
-    <p><button onclick="listDevices()">枚举设备</button></p>
-    <h4>摄像头</h4>
-    <div id="videoDevices"></div>
-    <h4>麦克风</h4>
-    <div id="audioDevices"></div>
-    <p><button onclick="switchVideoDevice()">随机切换摄像头</button></p>
-    <p><button onclick="switchAudioDevice()">随机切换麦克风</button></p>
-    <p><button onclick="switchRole()">切换角色</button></p>
+    <button class="btn btn-default" type="button" onclick="connect()">连接</button>
+    <button class="btn btn-default" type="button" onclick="enter()">进入房间</button>
+    <button class="btn btn-default" type="button" onclick="quitRTC()">退房</button>
+    <button class="btn btn-default" type="button" onclick="stopRTC()">停止推流</button>
+    <button class="btn btn-default" type="button" onclick="startRTC()">开始推流</button>
         <div id="remote-video-wrap">
 
         </div>
@@ -51,6 +50,13 @@
   <!-- jquery Demo用到，WebRTCAPI不依赖 -->
   <script src="../assets/libs/jquery.min.js"></script>
   <script src="../assets/libs/vconsole.min.js"></script>
+  <script>
+    // var vConsole = new VConsole();
+  </script>
+  <!-- 引入WebRTCAPI ， 强烈建议使用如下的CDN方式引入 -->
+  <!-- <script src="https://sqimg.qq.com/expert_qq/webrtc/2.4/WebRTCAPI.min.js"></script> -->
+  <!-- demo 部分 -->
+  <!-- <script src="../dist/WebRTCAPI.min.js"></script> -->
   <script src="../dist/WebRTCAPI.min.js"></script>
   <script>
     document.write('<script src="./js/index.js?v='+new Date()+'" type="text/javascript"></scr'+'ipt>')
@@ -67,6 +73,5 @@
             s.parentNode.insertBefore(mta, s);
         })();
     </script>
-  
 <!-- Global site tag (gtag.js) - Google Analytics --> <script async src="https://www.googletagmanager.com/gtag/js?id=UA-121844058-1"></script> <script>   window.dataLayer = window.dataLayer || [];   function gtag(){dataLayer.push(arguments);}   gtag('js', new Date());    gtag('config', 'UA-121844058-1'); </script></body>
 </html>

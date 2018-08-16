@@ -324,6 +324,17 @@ function getMediaStream( type ,callback ){
         },function(error){
             console.error('failed', error)
         });
+    } else if( type === 'audio' ){
+        console.debug( 'audio ')
+        RTC.getLocalStream({
+           video: false
+        },function(info){
+            console.debug('getLocalStream succ', info.stream)
+            streams['camera'] = info.stream
+            callback( info.stream )
+        },function(error){
+            console.error('failed', error)
+        });
     }     
 }
 
@@ -337,6 +348,12 @@ function getScreen() {
 function getCamera() {
     getMediaStream('camera', function(stream){
         document.getElementById("cameraVideo").srcObject = stream
+    })
+}
+function getAudio() {
+    getMediaStream('audio', function(stream){
+        document.getElementById("audio").srcObject = stream
+        document.getElementById("audio").controls = true
     })
 }
 function push() {

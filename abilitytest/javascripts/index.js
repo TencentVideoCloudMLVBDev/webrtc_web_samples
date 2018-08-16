@@ -361,6 +361,24 @@ function wsonclose(data){
     console.debug(data);
 }
 
+
+function checkH264Support( callback ){
+    var peer = new RTCPeerConnection(null);
+    peer.createOffer({
+    offerToReceiveAudio: 1,
+    offerToReceiveVideo: 1
+    }).then(function(data){
+        if( data.sdp.toLowerCase().indexOf("h264") === -1 ){
+            callback( false )
+        }else{
+            callback( true )
+        }
+        peer.close();
+    },function(data){
+        callback( false )
+    });
+}
+
 function startConnectionTest() {
     if(!isWebRTCSupported){
         onConnectionTestDone(-1);
@@ -415,8 +433,6 @@ function startBrowserTest(){
     for(var a in isMobile){
         if( isMobile[a]() ){
             isMobileBrowser = true
-            console.debug(a)
-            console.debug(isMobile[a]())
             titleText = a + ":";
             var version = checkTBSVersion(navigator.userAgent);
             if( a === 'Android' && version && version < 43600 ){
@@ -449,18 +465,27 @@ function startBrowserTest(){
         }
     }
 
-    if( !isMobileBrowser){
-        if(isWebRTCSupported){
-            titleText =  "当前浏览器 支持 !!!";
-            $("#browser-title").css("background", "#90dc90");
-            $("#browser-title")[0].innerText = titleText;
-        }else{
-
-            titleText = "当前浏览器 不支持 !!!";
-            $("#browser-title").css("background", "#dc9090");
-            $("#browser-title")[0].innerText = titleText;
+    checkH264Support(function(support){
+        titleText = "当前浏览器 不支持 !!!"
+        if( !support ){
+            isWebRTCSupported = false
+            titleText +="(不支持H264)"
         }
-    }
+        if( !isMobileBrowser){
+            if(isWebRTCSupported){
+                titleText =  "当前浏览器 支持 !!!";
+                $("#browser-title").css("background", "#90dc90");
+                $("#browser-title")[0].innerText = titleText;
+            }else{
+    
+                
+                $("#browser-title").css("background", "#dc9090");
+                $("#browser-title")[0].innerText = titleText;
+            }
+        }
+    });
+
+    
 }
 
 

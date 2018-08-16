@@ -42,8 +42,9 @@
   <!-- RTC  -->
   <div id="video-section" style="display: none">
     <button class="btn btn-default" type="button" onclick="connect()">进入房间</button>
+    <button class="btn btn-default" type="button" onclick="getAudio()">只采集音频</button>
     <button class="btn btn-default" type="button" onclick="getScreen()">采集屏幕</button>
-    <button class="btn btn-default" type="button" onclick="getCamera()">采集摄像头</button>
+    <button class="btn btn-default" type="button" onclick="getCamera()">采集摄像头&音频</button>
     <button class="btn btn-default" type="button" onclick="startRTC('camera')">推摄像头</button>
       <button class="btn btn-default" type="button" onclick="startRTC('screen')">推屏幕采集</button>
       <button class="btn btn-default" type="button" onclick="startRTC('canvas')">push canvas</button>
@@ -51,6 +52,7 @@
       <br />
         <video id="screenVideo" autoplay muted style="width:400px"></video>
         <video id="cameraVideo" autoplay muted style="width:400px"></video>
+        <audio id="audio"  autoplay muted style="width:400px"></audio>
       <!-- 登录  -->
         <div id="remote-video-wrap">
 

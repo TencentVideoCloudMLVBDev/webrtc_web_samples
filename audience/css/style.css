@@ -167,7 +167,7 @@ video {
     width: 100%!important;
     height: auto!important;
 }
-@media (min-width: 800px) {
+/* @media (min-width: 800px) {
     video {
         width: 50%!important;
         height: auto!important;
@@ -176,7 +176,7 @@ video {
         width: 60px!important;
         height: 60px!important;
     }
-}
+}  */
 label{width:100%}
 .entry_room {
     display: -webkit-flex;

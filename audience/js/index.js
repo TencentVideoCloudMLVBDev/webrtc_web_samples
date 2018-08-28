@@ -110,6 +110,7 @@ Bom = {
 };
 
 
+$("#userId").val("video_" + parseInt(Math.random() * 100000000));
 var phonenum = Bom.query("phonenum")
 var pstntype = Bom.query("pstntype")
 var roomid = Bom.query("roomid")
@@ -133,7 +134,6 @@ if( userId ){
     $("#userId").val( userId )
 }
 
-
 function initRTC(opts) {
     // 初始化
     // opts.userId="xiaolin";
@@ -148,7 +148,8 @@ function initRTC(opts) {
         accountType: opts.accountType,
         wsRetryMaxTimes: 5, //最大重连次数 
         wsRetryDist: 3000, //毫秒 ，首次间隔3000毫秒， 第N次重连间隔 为 N * DIST （ 2 * 3000） 
-        closeLocalMedia: opts.closeLocalMedia
+        closeLocalMedia: opts.closeLocalMedia,
+        // video:false
     }, function () {
         RTC.createRoom({
             roomid: opts.roomid * 1,
@@ -187,7 +188,7 @@ function initRTC(opts) {
     RTC.on("onErrorNotify", function (info) {
         console.error(info)
         if( info.errorCode === RTC.getErrorCode().GET_LOCAL_CANDIDATE_FAILED){
-            alert( info.errorMsg )
+            // alert( info.errorMsg )
         }
     });
     RTC.on("onStreamNotify", function (info) {
@@ -200,17 +201,11 @@ function initRTC(opts) {
         // console.error( 'onUserDefinedWebRTCEventNotice',info )
     });
 }
-$("#userId").val("video_" + parseInt(Math.random() * 100000000));
 
-function push() {
-    //推流
+function push( ) {
     login(false);
-
-
 }
-
 function audience() {
-    //不推流
     login(true);
 }
 
@@ -251,24 +246,6 @@ function chooseAudio(index) {
     });
 }
 
-Bom = {
-    /**
-     * @description 读取location.search
-     *
-     * @param {String} n 名称
-     * @return {String} search值
-     * @example
-     * 		$.bom.query('mod');
-     */
-    query: function (n) {
-        var m = window.location.search.match(new RegExp("(\\?|&)" + n + "=([^&]*)(&|$)"));
-        return !m ? "" : decodeURIComponent(m[2]);
-    },
-    getHash: function (n) {
-        var m = window.location.hash.match(new RegExp("(#|&)" + n + "=([^&]*)(&|$)"));
-        return !m ? "" : decodeURIComponent(m[2]);
-    }
-};
 
 function login(closeLocalMedia) {
     sdkappid = Bom.query("sdkappid") || $("#sdkappid").val();

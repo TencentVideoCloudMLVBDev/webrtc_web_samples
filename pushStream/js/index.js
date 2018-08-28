@@ -8,23 +8,19 @@ function drawClock() {
     context.fillStyle = "#fff";
     context.fillRect(0, 0, canvasEle.width, canvasEle.height);
 
-    var circleX = 200; // 鍦嗗績X鍧愭爣
-    var circleY = 200; // 鍦嗗績Y鍧愭爣
-    var radius = 190; // 鍗婂緞闀垮害
+    var circleX = 200; 
+    var circleY = 200; 
+    var radius = 190; 
 
-    // 鑾峰彇鏃堕棿淇℃伅
     var date = new Date();
     var hour = date.getHours();
     var min = date.getMinutes();
     var sec = date.getSeconds();
 
-    // 鍒嗛拡璧颁竴鍦�60搴︼紝鏃堕拡璧�30搴�
-    // 搴︽暟杞寲涓哄姬搴�  搴︽暟*Math.PI/180
     var hourValue = (-90 + 30 * hour + min / 2) * Math.PI / 180;
     var minValue = (-90 + 6 * min) * Math.PI / 180;
     var secValue = (-90 + 6 * sec) * Math.PI / 180;
 
-    // 缁樺埗琛ㄧ洏
     context.beginPath();
     context.font = "bold 16px Arial";
     context.lineWidth = '3';
@@ -41,28 +37,28 @@ function drawClock() {
     context.closePath();
     context.fill();
 
-    // 缁樺埗閽熻〃涓績
+    
     context.beginPath();
     context.arc(200, 200, 6, 0, 360, false);
     context.fillStyle = "#000";
-    context.fill(); //鐢诲疄蹇冨渾
+    context.fill(); 
     context.closePath();
 
-    // 缁樺埗鏃堕拡鍒诲害
+    
     context.lineWidth = '5';
     context.beginPath();
     context.moveTo(circleX, circleY);
     context.arc(circleX, circleY, radius * 9 / 20, hourValue, hourValue, false);
     context.stroke();
 
-    // 缁樺埗鍒嗛拡
+    
     context.lineWidth = '3';
     context.beginPath();
     context.moveTo(circleX, circleY);
     context.arc(circleX, circleY, radius * 13 / 20, minValue, minValue, false);
     context.stroke();
 
-    // 缁樺埗绉掗拡
+    
     context.lineWidth = '1';
     context.beginPath();
     context.moveTo(circleX, circleY);
@@ -70,7 +66,7 @@ function drawClock() {
     context.stroke();
 
 
-    // 缁樺埗閽熻〃鐨勬暟瀛�
+    
     context.fillStyle = "#0ad";
     context.fillText("12", 190, 34);
     context.fillText("3", 370, 206);
@@ -81,10 +77,7 @@ function drawClock() {
 setInterval(drawClock, 1000);
 drawClock();
 
-
-// canvas鎹曡幏涓簊tream canvasEle.captureStream(frameRate)
 var CanvasStream = canvasEle.captureStream(25);
-// 鑾峰彇闊抽娴侊紝骞跺皢闊宠建娣诲姞鍒版崟鑾风殑stream涓�
 navigator.mediaDevices.getUserMedia({
     audio: true
 }, function (audioStream) {

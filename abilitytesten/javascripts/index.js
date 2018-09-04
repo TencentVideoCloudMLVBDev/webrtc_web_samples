@@ -301,7 +301,7 @@ function startSupportTest() {
     supTest.run();
 }
 
-var FetchSigCgi = 'https://sxb.qcloud.com/sxb_dev/?svc=doll&cmd=fetchsig';
+var FetchSigCgi = 'https://www.qcloudtrtc.com/sxb_dev/?svc=doll&cmd=fetchsig';
 function getUserSig( callback ){
     
     $.ajax({

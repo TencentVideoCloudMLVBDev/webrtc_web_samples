@@ -3,7 +3,7 @@
     为了保持在功能演示方面的简洁， demo不会做任何合法性校验
 */
 
-// 本demo用到的唯一一个CGI，获取usersig （什么是usersig? 请看 https://sxb.qcloud.com/webrtcapi/ )
+// 本demo用到的唯一一个CGI，获取usersig （什么是usersig? 请看 https://www.qcloudtrtc.com/webrtcapi/ )
 // 如果您不了解非对称加密，可以这样简单理解：
 // 你有公钥 和 私钥 两把钥匙，腾讯云有一把钥匙（公玥）
 // 你把数据丢盒子里，并且用私钥上锁，然后把上了锁的盒子给到腾讯云
@@ -12,7 +12,7 @@
 // 去控制台把私钥下载下来，用TLS工具算一个签名（usersig)
 
 //不要把您的sdkappid填进来就用这个cgi去测，测试demo的cgi没有您的私钥，臣妾做不到啊
-var FetchSigCgi = 'https://sxb.qcloud.com/sxb_dev/?svc=account&cmd=authPrivMap';
+var FetchSigCgi = 'https://www.qcloudtrtc.com/sxb_dev/?svc=account&cmd=authPrivMap';
 var sdkappid,
     accountType = 14418, // accounttype 还是在文档中会找到
     userSig,
@@ -109,7 +109,6 @@ Bom = {
 	}
 };
 
-
 $("#userId").val("video_" + parseInt(Math.random() * 100000000));
 var phonenum = Bom.query("phonenum")
 var pstntype = Bom.query("pstntype")
@@ -117,6 +116,7 @@ var roomid = Bom.query("roomid")
 var sdkappid = Bom.query("sdkappid")
 var userId = Bom.query("userId")
 var useCloud = Bom.query("useCloud") ? parseInt(Bom.query("useCloud")) : 1;
+var privmap = Bom.query("privmap") ? parseInt(Bom.query("privmap")) : 255;
 console.error('useCloud',useCloud)
 if( phonenum ){
     $("#phonenum").val( phonenum)
@@ -132,6 +132,8 @@ if( sdkappid ){
 }
 if( userId ){
     $("#userId").val( userId )
+}if( privmap ){
+    $("#privmap").val( privmap )
 }
 
 function initRTC(opts) {
@@ -153,7 +155,8 @@ function initRTC(opts) {
     }, function () {
         RTC.createRoom({
             roomid: opts.roomid * 1,
-            privateMapKey: opts.privateMapKey,
+            privateMap: parseInt( $("#privmap").val() ),
+            // privateMapKey: opts.privateMapKey,
             role: "user",
             // role : "wp1280",
             /* constraints: { 
